@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%highlight(%-5level %d{yyyy-MM-dd HH:mm:ss} - %msg%n)</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="protocol" level="INFO" />
+
+	<root level="OFF">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+	<!--
+	<appender name="PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%highlight(%msg%n)</pattern>
+		</encoder>
+	</appender>
+
+	<property name="root.loglevel" value="OFF"/>
+	<property name="protocol.loglevel" value="INFO"/>
+	<property name="protocol.appender" value="PLAIN"/>
+
+	<springProfile name="verbose">
+		<property name="protocol.loglevel" value="DEBUG"/>
+		<property name="protocol.appender" value="STOUT"/>
+	</springProfile>
+
+	<logger name="protocol" level="${protocol.loglevel}" />
+
+	<root level="${root.loglevel}">
+		<appender-ref ref="${protocol.appender}" />
+	</root>
+
+	-->
+</configuration>

@@ -1,0 +1,85 @@
+metadata:
+  name: testconfig
+  description: This is a test config
+auth:
+  type: basic
+  username: ${env.user}
+  password: ${env.passwd}
+defaultTimeout: 20000
+constants:
+  foo: bar
+requests:
+  - metadata:
+      name: test1
+      description: This is a test request
+    skipCondition:
+      value: ${env.skipFirstRequest}
+      operation: isTrue
+      message: Skipped in this environment
+    requestDefinition:
+      url: "http://localhost:8080/test1"
+      method: POST
+      timeout: 10000
+      headers:
+        Content-Type: application/json
+      body:
+        raw: >
+          {
+            "id": "${env.myId}",
+            "name": "test"
+          }
+    responseHandling:
+      assertions:
+        - value: ${response.statusCode}
+          operation: equals
+          other: "200"
+          message: Status code must be 200
+        - value: ${response.json}
+          operation: notNull
+          message: Response body must not be null
+        - value: ${response.json.id}
+          operation: equals
+          other: ${env.myId}
+          message: The id must match the saved id
+      setVars:
+        tempId: ${response.json.id}
+    flowControl:
+      waitAfter: 201
+      repeatUntil:
+        condition:
+          value: ${response.statusCode}
+          operation: equals
+          other: "200"
+        maxAttempts: 3
+        waitBetweenAttempts: 201
+        messageOnFail: Failed to get 200 status code after three attempts
+
+  - metadata:
+      name: test2
+    requestDefinition:
+      url: "http://localhost:8080/test2"
+      method: GET
+      auth:
+        type: none
+subSuites:
+  - metadata:
+      name: childconfig
+      description: This is a child config
+    auth:
+      type: none
+    requests:
+      - metadata:
+          name: test1
+        requestDefinition:
+          url: "http://localhost:8080/test1"
+          method: GET
+      - metadata:
+          name: test2
+        requestDefinition:
+          url: "http://localhost:8080/test2"
+          method: POST
+          headers:
+            Content-Type: application/json
+          body: 
+            raw: >
+              {}

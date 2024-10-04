@@ -1,0 +1,126 @@
+metadata:
+  name: crudApiSpec
+  description: Specification of the API of the CRUD application
+constants:
+  firstDisplayName: "first user"
+  secondDisplayName: "second user"
+subSuites:
+  - metadata:
+      name: Preparation
+      description: Preparational steps
+    requests:
+      - metadata:
+          name: Clear database
+          description: Clears the database
+        requestDefinition:
+          url: ${env.baseUrl}/clear
+          method: DELETE
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "204"
+              message: Status code must be 204
+  - metadata:
+      name: Create initial users
+      description: Creates two initial users
+    requests:
+      - metadata:
+          name: Create first
+          description: Creates the first user
+        requestDefinition: &createRequestDefinition
+          url: ${env.baseUrl}/create
+          method: POST
+          headers:
+            Content-Type: application/json
+          body:
+            raw: >
+              {
+                "username": "first",
+                "displayName": "${constants.firstDisplayName}"
+              }
+        responseHandling: &createResponseHandling
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "201"
+              message: Status code must be 201
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json.id}
+              operation: notNull
+              message: The response body must have an id
+            - value: ${response.json.username}
+              operation: notNull
+              message: The response body must have a username
+          setVars:
+            firstId: ${response.json.id}
+
+      - metadata:
+          name: Create second
+          description: Creates the second user
+        requestDefinition:
+          <<: *createRequestDefinition
+          body:
+            raw: >
+              {
+                "username": "second",
+                "displayName": "${constants.secondDisplayName}"
+              }
+        responseHandling:
+          <<: *createResponseHandling
+          setVars:
+            secondId: ${response.json.id}
+
+  - metadata:
+      name: Read Users
+      description: Reads the two initial users
+    requests:
+      - metadata:
+          name: Read first
+          description: Reads the first user
+        requestDefinition: &readRequestDefinition
+          url: ${env.baseUrl}/user/${vars.firstId}
+          method: GET
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "201"
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json.id}
+              operation: equals
+              other: ${vars.firstId}
+              message: The id must be the saved id '${vars.firstId}'
+            - value: ${response.json.username}
+              operation: equals
+              other: "first"
+              message: The username must be 'first'
+
+      - metadata:
+          name: Read second
+          description: Reads the second user
+        requestDefinition:
+          <<: *readRequestDefinition
+          url: ${env.baseUrl}/user/${vars.secondId}
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "200"
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json.id}
+              operation: equals
+              other: ${vars.secondId}
+              message: The id must be the saved id '${vars.secondId}'
+            - value: ${response.json.username}
+              operation: equals
+              other: "second"
+              message: The username must be 'second'
