@@ -1,6 +1,5 @@
-package dev.pbroman.simple.api.tester.service;
+package dev.pbroman.simple.api.tester.handler;
 
-import dev.pbroman.simple.api.tester.handler.DefaultHttpRequestHandler;
 import dev.pbroman.simple.api.tester.records.Auth;
 import dev.pbroman.simple.api.tester.util.AuthHeaderCreator;
 import dev.pbroman.simple.api.tester.records.RequestDefinition;

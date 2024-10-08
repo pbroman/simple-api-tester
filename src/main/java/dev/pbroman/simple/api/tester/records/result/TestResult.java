@@ -7,10 +7,10 @@ import java.util.List;
 
 public record TestResult(
         Metadata requestMetadata,
-        int numAttempt,
         RequestDefinition requestDefinition,
         Object response,
-        long executionTime,
+        int numAttempt,
+        long roundTripTime,
         List<AssertionResult> assertionResults) {
 
     public TestResult {

@@ -12,4 +12,5 @@ public record AssertionResult(Condition condition, Condition interpolatedConditi
             throw new IllegalArgumentException("Interpolated condition cannot be null");
         }
     }
+
 }

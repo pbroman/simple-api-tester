@@ -43,9 +43,12 @@ public record Auth(String type, String username, String password, String token) 
     }
 
     public Auth interpolated(RuntimeData runtimeData) {
-        var interpolatedUsername = Interpolation.interpolate(username, runtimeData).toString();
-        var interpolatedPassword = Interpolation.interpolate(password, runtimeData).toString();
-        var interpolatedToken = Interpolation.interpolate(token, runtimeData).toString();
-        return new Auth(type, interpolatedUsername, interpolatedPassword, interpolatedToken);
+        var uname = Interpolation.interpolate(username, runtimeData);
+        var pw = Interpolation.interpolate(password, runtimeData);
+        var itoken = Interpolation.interpolate(token, runtimeData);
+        uname = uname != null ? uname.toString(): null;
+        pw = pw != null ? pw.toString(): null;
+        itoken = itoken != null ? itoken.toString(): null;
+        return new Auth(type, (String) uname, (String) pw, (String) itoken);
     }
 }

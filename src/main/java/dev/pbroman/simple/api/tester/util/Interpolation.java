@@ -1,6 +1,7 @@
 package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,7 +90,7 @@ public class Interpolation {
                         throw new IllegalArgumentException("The 'response' variable must have at least one key, e.g. ${response.statusCode} or ${response.json}, got : " + String.join(".", parts));
                     } else {
                         var subparts = Arrays.copyOfRange(parts, 1, parts.length);
-                        switch (subparts[0]) {
+                        switch (StringUtils.substringBefore(subparts[0], "[")) {
                             case STATUS_CODE:
                                 guardSoleSingleKey(subparts);
                                 valuesList.add(runtimeData.responseVars().get(STATUS_CODE).toString());
@@ -112,11 +113,7 @@ public class Interpolation {
                                 break;
 
                             case JSON:
-                                if (runtimeData.responseVars().get(JSON) instanceof JSONObject json) {
-                                    valuesList.add(getJsonValue(json, subparts));
-                                } else {
-                                    throw new IllegalArgumentException("The response.json is not a JSONObject");
-                                }
+                                valuesList.add(getJsonValue(runtimeData.responseVars().get(JSON), subparts));
                                 break;
 
                             default:
@@ -140,9 +137,17 @@ public class Interpolation {
         return inputString;
     }
 
-    private static Object getJsonValue(JSONObject json, String[] parts) {
-        for (int i = 1; i < parts.length; i++) {
-            var varPart = parts[i].split("\\[")[0];
+    private static Object getJsonValue(Object body, String[] parts) {
+        // parts is here e.g. '["json", "array[0]", "test"]'
+        if (body == null) {
+            return null;
+        }
+        if (!(body instanceof JSONObject) && !(body instanceof JSONArray)) {
+            throw new IllegalArgumentException("Invalid json in response body");
+        }
+        var json = new JSONObject().put("json", body);
+        for (int i = 0; i < parts.length; i++) {
+            var varPart = StringUtils.substringBefore(parts[i], "[");
             if (json.has(varPart)) {
                 try {
                     var indexMatch = arrayIndexPattern.matcher(parts[i]);
@@ -154,14 +159,14 @@ public class Interpolation {
                     } else if (json.get(varPart) instanceof JSONArray) {
                         return json.getJSONArray(varPart);
                     } else if (json.get(varPart) instanceof JSONObject) {
-                        return json.getJSONObject(varPart);
+                        json = json.getJSONObject(varPart);
                     } else if (json.get(varPart) instanceof String) {
                         return json.getString(varPart);
                     } else {
                         throw new IllegalArgumentException("Unknown type of json value: " + json.get(varPart));
                     }
                 } catch (JSONException e) {
-                    throw new IllegalArgumentException("Invalid json in response body", e);
+                    throw new IllegalArgumentException("Invalid json path request of response body", e);
                 }
             }
             else if (parts[i].startsWith("_")) {

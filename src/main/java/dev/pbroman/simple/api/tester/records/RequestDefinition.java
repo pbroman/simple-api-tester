@@ -21,23 +21,32 @@ public record RequestDefinition(
     public RequestDefinition {
         Objects.requireNonNull(url, "Request url cannot be null");
         Objects.requireNonNull(method, "Request method cannot be null");
+        if (auth == null) {
+            auth = new Auth(Auth.AUTH_TYPE_NONE, null, null, null);
+        }
         if ( "POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method) ) {
             Objects.requireNonNull(body, "Request body cannot be null for method " + method);
-        }
-        // check congruence between body type (defined in header) and body map
-        if ( headers != null && headers.get("Content-Type") != null ) {
-            if ( headers.get("Content-Type").startsWith("application/json")) {
-                if (body != null && body.get(RAW_BODY) != null) {
+            // check congruence between body type (defined in header) and body map
+            if ( headers != null && headers.get("Content-Type") != null ) {
+                if ( headers.get("Content-Type").startsWith("application/json")) {
+                    if (body != null && body.get(RAW_BODY) != null) {
+                        body.put(BODY_STRING, body.get(RAW_BODY));
+                    } else {
+                        throw new IllegalArgumentException("Body type 'raw' must be present for 'application/json' content type");
+                    }
+                }
+                else if ( headers.get("Content-Type").startsWith("application/x-www-form-urlencoded")) {
+                    if (body != null && !body.isEmpty()) {
+                        body.put(BODY_STRING, body.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).reduce((a, b) -> a + "&" + b).orElse(""));
+                    }
+                    throw new IllegalArgumentException("Form url encoded body must define key-value pairs for the body");
+                }
+            } else {
+                if (body.get(RAW_BODY) != null) {
                     body.put(BODY_STRING, body.get(RAW_BODY));
                 } else {
-                    throw new IllegalArgumentException("Body type 'raw' must be present for 'application/json' content type");
+                    throw new IllegalArgumentException("No valid body definition found. Please set the body type 'raw'");
                 }
-            }
-            else if ( headers.get("Content-Type").startsWith("application/x-www-form-urlencoded")) {
-                if (body != null && !body.isEmpty()) {
-                    body.put(BODY_STRING, body.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).reduce((a, b) -> a + "&" + b).orElse(""));
-                }
-                throw new IllegalArgumentException("Form url encoded body must define key-value pairs for the body");
             }
         }
     }

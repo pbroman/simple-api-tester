@@ -2,6 +2,8 @@ package dev.pbroman.simple.api.tester.records.runtime;
 
 import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.result.TestResult;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 
@@ -53,8 +55,12 @@ public record RuntimeData(
         if (response.getBody() != null) {
             try {
                 newResponseVars.put(JSON, new JSONObject(response.getBody()));
-            } catch (Exception e) {
-                // noop
+            } catch (JSONException e) {
+                try {
+                    newResponseVars.put(JSON, new JSONArray(response.getBody()));
+                } catch (JSONException e1) {
+                    // noop
+                }
             }
         }
         return new RuntimeData(constants, env, vars, newResponseVars, currentTestSuite, testResults);

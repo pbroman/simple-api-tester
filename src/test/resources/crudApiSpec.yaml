@@ -1,9 +1,6 @@
 metadata:
   name: crudApiSpec
   description: Specification of the API of the CRUD application
-constants:
-  firstDisplayName: "first user"
-  secondDisplayName: "second user"
 subSuites:
   - metadata:
       name: Preparation
@@ -36,8 +33,7 @@ subSuites:
           body:
             raw: >
               {
-                "username": "first",
-                "displayName": "${constants.firstDisplayName}"
+                "username": "first"
               }
         responseHandling: &createResponseHandling
           assertions:
@@ -56,7 +52,6 @@ subSuites:
               message: The response body must have a username
           setVars:
             firstId: ${response.json.id}
-
       - metadata:
           name: Create second
           description: Creates the second user
@@ -65,13 +60,31 @@ subSuites:
           body:
             raw: >
               {
-                "username": "second",
-                "displayName": "${constants.secondDisplayName}"
+                "username": "second"
               }
         responseHandling:
           <<: *createResponseHandling
           setVars:
             secondId: ${response.json.id}
+      - metadata:
+          name: Create second again
+          description: Tries to create an existing user
+        requestDefinition:
+          <<: *createRequestDefinition
+          body:
+            raw: >
+              {
+                "username": "second"
+              }
+        responseHandling: &conflictResponseHandling
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "409"
+              message: Status code must be 409
+            - value: ${response.json}
+              operation: '!null'
+              message: Response body should not be null
 
   - metadata:
       name: Read Users
@@ -87,7 +100,7 @@ subSuites:
           assertions:
             - value: ${response.statusCode}
               operation: equals
-              other: "201"
+              other: "200"
               message: Status code must be 200
             - value: ${response.json}
               operation: notNull
@@ -100,7 +113,6 @@ subSuites:
               operation: equals
               other: "first"
               message: The username must be 'first'
-
       - metadata:
           name: Read second
           description: Reads the second user
@@ -124,3 +136,185 @@ subSuites:
               operation: equals
               other: "second"
               message: The username must be 'second'
+      - metadata:
+          name: Read non-present
+          description: Tries to read a non-present user
+        requestDefinition:
+          <<: *readRequestDefinition
+          url: ${env.baseUrl}/user/nonPresent
+        responseHandling: &notPresentResponseHandling
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "404"
+              message: Status code must be 404
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+      - metadata:
+          name: Retrieve all users
+          description: Reads all current users
+        requestDefinition:
+          url: ${env.baseUrl}/all
+          method: GET
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "200"
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json._length}
+              operation: equals
+              other: 2
+              message: The response should be an array of length 2
+
+  - metadata:
+      name: Search Users
+    requests:
+      - metadata:
+          name: Search first
+          description: Searches for a user with the name first
+        requestDefinition:
+          url: ${env.baseUrl}/search/first
+          method: GET
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "200"
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json[0].id}
+              operation: equals
+              other: ${vars.firstId}
+              message: The id must be the saved id of the first user, '${vars.firstId}'
+      - metadata:
+          name: Search not found
+          description: Searches for a non-present user
+        requestDefinition:
+          url: ${env.baseUrl}/search/nobody
+          method: GET
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: 200
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json}
+              operation: equals
+              other: "[]"
+              message: The response must be an empty array
+
+  - metadata:
+      name: Update Users
+    requests:
+      - metadata:
+          name: Update first
+          description: Set the username of first user to newFirst
+        requestDefinition: &updateRequestDefinition
+          url: ${env.baseUrl}/update
+          method: POST
+          headers:
+            Content-Type: application/json
+          body:
+            raw: >
+              {
+                "id": "${vars.firstId}",
+                "username": "newFirst"
+              }
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "200"
+              message: Status code must be 200
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+            - value: ${response.json.id}
+              operation: equals
+              other: ${vars.firstId}
+              message: The id must be the saved id of the first user, '${vars.firstId}'
+            - value: ${response.json.username}
+              operation: equals
+              other: newFirst
+              message: The username should be 'newFirst'
+      - metadata:
+          name: Update second
+          description: Try to set the username of second user to newFirst as well
+        requestDefinition:
+          <<: *updateRequestDefinition
+          body:
+            raw: >
+              {
+                "id": "${vars.secondId}",
+                "username": "newFirst"
+              }
+        responseHandling:
+          <<: *conflictResponseHandling
+      - metadata:
+          name: Update bad request
+          description: Update without id
+        requestDefinition:
+          <<: *updateRequestDefinition
+          body:
+            raw: >
+              {
+                "username": "newFirst"
+              }
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "400"
+              message: Status code must be 400
+            - value: ${response.json}
+              operation: notNull
+              message: Response body must not be null
+      - metadata:
+          name: Update non-present
+          description: Tries to update a non-present user
+        requestDefinition:
+          <<: *updateRequestDefinition
+          body:
+            raw: >
+              {
+                "id": "notPresent"
+              }
+        responseHandling:
+          <<: *notPresentResponseHandling
+
+  - metadata:
+      name: Delete Users
+    requests:
+      - metadata:
+          name: Delete first
+          description: Deletes the first user
+        requestDefinition:
+          url: ${env.baseUrl}/delete/${vars.firstId}
+          method: DELETE
+        responseHandling:
+          assertions:
+            - value: ${response.statusCode}
+              operation: equals
+              other: "204"
+              message: Status code must be 204
+            - value: ${response.json}
+              operation: 'null'
+              message: Response body must be null
+      - metadata:
+          name: Delete first again
+          description: Deletes the first user, that should not be there any more
+        requestDefinition:
+          url: ${env.baseUrl}/delete/${vars.firstId}
+          method: DELETE
+        responseHandling:
+          <<: *notPresentResponseHandling

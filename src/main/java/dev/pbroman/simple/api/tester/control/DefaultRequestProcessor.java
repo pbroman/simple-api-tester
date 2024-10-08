@@ -3,6 +3,7 @@ package dev.pbroman.simple.api.tester.control;
 import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.ResponseHandler;
+import dev.pbroman.simple.api.tester.api.TestResultProcessor;
 import dev.pbroman.simple.api.tester.records.result.TestResult;
 import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import dev.pbroman.simple.api.tester.records.Request;
@@ -23,10 +24,12 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
     private final HttpRequestHandler httpRequestHandler;
     private final ResponseHandler responseHandler;
+    private final TestResultProcessor testResultProcessor;
 
-    public DefaultRequestProcessor(HttpRequestHandler httpRequestHandler, ResponseHandler responseHandler) {
+    public DefaultRequestProcessor(HttpRequestHandler httpRequestHandler, ResponseHandler responseHandler, TestResultProcessor testResultProcessor) {
         this.httpRequestHandler = httpRequestHandler;
         this.responseHandler = responseHandler;
+        this.testResultProcessor = testResultProcessor;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
         }
 
         var testResult = processInternal(request, runtimeData, 1);
-        runtimeData.addTestResult(testResult);
+        testResultProcessor.process(testResult, runtimeData);
     }
 
     private TestResult processInternal(Request request, RuntimeData runtimeData, int numAttempt) {
@@ -48,15 +51,14 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
         long startTime = System.currentTimeMillis();
         var response = httpRequestHandler.performRequest(requestDefinition);
-        long executionTime = System.currentTimeMillis() - startTime;
-
-
+        long roundTripTime = System.currentTimeMillis() - startTime;
 
         protocol.info("  Response status: {}", response.getStatusCode());
+        protocol.info("  Response body: {}", response.getBody());
 
         runtimeData = runtimeData.withHttpResponseVars(response);
         var assertionResults = responseHandler.handleResponse(request.responseHandling(), runtimeData);
-        var testResult = new TestResult(request.metadata(), numAttempt, requestDefinition, response, executionTime, assertionResults);
+        var testResult = new TestResult(request.metadata(), requestDefinition, response, numAttempt, roundTripTime, assertionResults);
 
         /*
          * Flow control, using data from the response

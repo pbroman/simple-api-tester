@@ -1,6 +1,5 @@
-package dev.pbroman.simple.api.tester.model;
+package dev.pbroman.simple.api.tester.records;
 
-import dev.pbroman.simple.api.tester.records.Condition;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

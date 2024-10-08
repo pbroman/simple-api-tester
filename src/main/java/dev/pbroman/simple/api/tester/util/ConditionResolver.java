@@ -1,6 +1,7 @@
 package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.records.Condition;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,14 +19,16 @@ public class ConditionResolver {
     public static final String ENDS_WITH = "endswith";
     public static final String MATCHES = "matches";
 
-    public static final String IS_TRUE = "istrue";
-    public static final String IS_FALSE = "isfalse";
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
 
     public static final String EQUAL_TO = "=";
     public static final String GREATER_THAN_OR_EQUAL = ">=";
     public static final String LESS_THAN_OR_EQUAL = "<=";
     public static final String GREATER_THAN = ">";
     public static final String LESS_THAN = "<";
+
+    public static final String IS_PREFIX = "is";
 
     public static final String NEGATION_REGEX = "^(not|!)(.*)";
     public static final Pattern NEGATION_PATTERN = Pattern.compile(NEGATION_REGEX);
@@ -34,11 +37,12 @@ public class ConditionResolver {
             NULL, EMPTY, EQUALS, CONTAINS, STARTS_WITH, ENDS_WITH, MATCHES, EQUALS_IGNORE_CASE, BLANK
     );
     public static final List<String> BOOLEAN_OPERATIONS = List.of(
-            IS_TRUE, IS_FALSE
+            TRUE, FALSE
     );
     public static final List<String> NUMBER_OPERATIONS = List.of(
             EQUAL_TO, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, GREATER_THAN, LESS_THAN
     );
+    public static final List<String> SINGLE_VALUE_OPERATIONS = List.of(NULL, EMPTY, BLANK, TRUE, FALSE);
 
     /**
      * Resolves a condition by comparing the value with the other value using the operation.
@@ -49,7 +53,7 @@ public class ConditionResolver {
      */
     public static boolean resolve(Condition condition) {
         if (condition.value() == null) {
-            return NULL.equals(condition.operation());
+            return NULL.equals(condition.operation()) || StringUtils.equalsIgnoreCase(IS_PREFIX + NULL, condition.operation());
         }
 
         var operation = condition.operation().toLowerCase().trim();
@@ -59,8 +63,11 @@ public class ConditionResolver {
             operation = matches.group(2);
             negate = true;
         }
+        if (StringUtils.startsWithIgnoreCase(operation, IS_PREFIX)) {
+            operation = StringUtils.substring(operation, 2);
+        }
 
-        if (condition.other() == null && !List.of(NULL, EMPTY, BLANK, IS_TRUE, IS_FALSE).contains(operation)) {
+        if (condition.other() == null && !SINGLE_VALUE_OPERATIONS.contains(operation)) {
             throw new IllegalArgumentException("other value may not be null for operation: " + operation);
         }
 
@@ -76,7 +83,7 @@ public class ConditionResolver {
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Unsupported combination of conditional operation '" + operation +
-                    "' with values '" + condition.value() + "' and '" + condition.other(), e);
+                    "' with values '" + condition.value() + "' and '" + condition.other() + "'", e);
         }
         throw new IllegalArgumentException("Unsupported conditional operation: " + operation);
     }
@@ -98,8 +105,8 @@ public class ConditionResolver {
 
     private static boolean resolveBooleanCondition(String operation, Boolean value) {
         return switch (operation) {
-            case IS_TRUE -> value;
-            case IS_FALSE -> !value;
+            case TRUE -> value;
+            case FALSE -> !value;
             default -> throw new IllegalArgumentException("Unsupported boolean operation: " + operation + " with value value: " + value);
         };
     }
@@ -119,13 +126,7 @@ public class ConditionResolver {
         if (value == null) {
             return null;
         }
-        return switch (value) {
-            case String s -> s;
-            case Integer i -> i.toString();
-            case Double d -> d.toString();
-            case Boolean b -> b.toString();
-            default -> null;
-        };
+        return value.toString();
     }
 
     private static Double convertToDouble(Object value) {

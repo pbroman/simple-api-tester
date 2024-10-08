@@ -1,7 +1,6 @@
-package dev.pbroman.simple.api.tester.helper;
+package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
-import dev.pbroman.simple.api.tester.util.Interpolation;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,6 +94,56 @@ class InterpolationTest {
         // then
         assertEquals(JSONObject.class, result.getClass());
         assertEquals("{}", result.toString());
+    }
+
+    @Test
+    void emptyArrayResponseJson() {
+        // given
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray()), null, null);
+
+        // when
+        var result = Interpolation.interpolate("${response.json}", runtimeData);
+
+        // then
+        assertEquals(JSONArray.class, result.getClass());
+        assertEquals("[]", result.toString());
+    }
+
+    @Test
+    void arrayResponseJson() {
+        // given
+        String jsonArray = "[{\"foo\": \"bar\"}]";
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)), null, null);
+
+        // when
+        var result = Interpolation.interpolate("${response.json[0].foo}", runtimeData);
+
+        // then
+        assertEquals(String.class, result.getClass());
+        assertEquals("bar", result.toString());
+    }
+
+    @Test
+    void deepArrayResponseJson() {
+        // given
+        String jsonArray = """
+                [ {}, {}, {
+                    "foo": "bar",
+                    "object": {
+                        "array": [ {}, {
+                            "moo": "baa"
+                        }]
+                    }
+                }]
+            """;
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)), null, null);
+
+        // when
+        var result = Interpolation.interpolate("${response.json[2].object.array[1].moo}", runtimeData);
+
+        // then
+        assertEquals(String.class, result.getClass());
+        assertEquals("baa", result.toString());
     }
 
     @Test

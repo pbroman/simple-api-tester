@@ -1,7 +1,6 @@
-package dev.pbroman.simple.api.tester.helper;
+package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.records.Condition;
-import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,8 +14,8 @@ import static dev.pbroman.simple.api.tester.util.ConditionResolver.EQUALS_IGNORE
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.EQUAL_TO;
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.GREATER_THAN;
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.GREATER_THAN_OR_EQUAL;
-import static dev.pbroman.simple.api.tester.util.ConditionResolver.IS_FALSE;
-import static dev.pbroman.simple.api.tester.util.ConditionResolver.IS_TRUE;
+import static dev.pbroman.simple.api.tester.util.ConditionResolver.FALSE;
+import static dev.pbroman.simple.api.tester.util.ConditionResolver.TRUE;
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.LESS_THAN;
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.LESS_THAN_OR_EQUAL;
 import static dev.pbroman.simple.api.tester.util.ConditionResolver.MATCHES;
@@ -29,10 +28,14 @@ class ConditionResolverTest {
     @Test
     void happyStringPaths() {
         assertTrue(ConditionResolver.resolve(new Condition(NULL, null, null)));
+        assertTrue(ConditionResolver.resolve(new Condition("isnull", null, null)));
         assertTrue(ConditionResolver.resolve(new Condition("notNull", "a", null)));
+        assertTrue(ConditionResolver.resolve(new Condition("notisNull", "", null)));
         assertTrue(ConditionResolver.resolve(new Condition(EMPTY, "", null)));
+        assertTrue(ConditionResolver.resolve(new Condition("isEmpty", "", null)));
         assertTrue(ConditionResolver.resolve(new Condition("notEmpty", "a", null)));
         assertTrue(ConditionResolver.resolve(new Condition("!empty", "a", null)));
+        assertTrue(ConditionResolver.resolve(new Condition("!isEmpty", "a", null)));
         assertTrue(ConditionResolver.resolve(new Condition(EQUALS, "foo", "foo")));
         assertTrue(ConditionResolver.resolve(new Condition("notEquals", "foo", "bar")));
         assertTrue(ConditionResolver.resolve(new Condition("!equals", "foo", "bar")));
@@ -47,8 +50,10 @@ class ConditionResolverTest {
         assertTrue(ConditionResolver.resolve(new Condition("!contains", "foo", "a")));
         assertTrue(ConditionResolver.resolve(new Condition(EQUALS_IGNORE_CASE, "foo", "fOO")));
         assertTrue(ConditionResolver.resolve(new Condition(BLANK, "   ", null)));
+        assertTrue(ConditionResolver.resolve(new Condition("ISBLANK", "   ", null)));
         assertTrue(ConditionResolver.resolve(new Condition("!blank", "foo", null)));
         assertTrue(ConditionResolver.resolve(new Condition("notblank", "foo", null)));
+        assertTrue(ConditionResolver.resolve(new Condition("notisblank", "foo", null)));
     }
 
     @Test
@@ -80,8 +85,8 @@ class ConditionResolverTest {
     @Test
     void happyBooleanPaths() {
         assertTrue(ConditionResolver.resolve(new Condition("notNull", Boolean.TRUE, null)));
-        assertTrue(ConditionResolver.resolve(new Condition(IS_TRUE, Boolean.TRUE, null)));
-        assertTrue(ConditionResolver.resolve(new Condition(IS_FALSE, Boolean.FALSE, null)));
+        assertTrue(ConditionResolver.resolve(new Condition(TRUE, Boolean.TRUE, null)));
+        assertTrue(ConditionResolver.resolve(new Condition(FALSE, Boolean.FALSE, null)));
     }
 
     @Test
@@ -94,7 +99,7 @@ class ConditionResolverTest {
         assertTrue(ConditionResolver.resolve(new Condition(EQUALS, 1.0, "1.0")));
         assertTrue(ConditionResolver.resolve(new Condition(EQUAL_TO, 1.0, "1.0")));
         assertTrue(ConditionResolver.resolve(new Condition(EQUAL_TO, 1.0, 1)));
-        assertTrue(ConditionResolver.resolve(new Condition(IS_TRUE, "true", null)));
+        assertTrue(ConditionResolver.resolve(new Condition(TRUE, "true", null)));
     }
 
     @Test
@@ -124,7 +129,7 @@ class ConditionResolverTest {
                 "Unsupported double operation should throw exception"
         );
         assertThrows(IllegalArgumentException.class,
-                () -> ConditionResolver.resolve(new Condition(IS_TRUE, 1, null)),
+                () -> ConditionResolver.resolve(new Condition(TRUE, 1, null)),
                 "Unsupported double operation should throw exception"
         );
         assertThrows(IllegalArgumentException.class,

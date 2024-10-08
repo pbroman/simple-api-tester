@@ -5,6 +5,7 @@ import dev.pbroman.simple.api.tester.records.RequestDefinition;
 import dev.pbroman.simple.api.tester.util.AuthHeaderCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.Map;
 
+import static dev.pbroman.simple.api.tester.records.Auth.AUTH_TYPE_NONE;
 import static dev.pbroman.simple.api.tester.util.Constants.BODY_STRING;
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 
@@ -56,12 +58,17 @@ public class DefaultHttpRequestHandler implements HttpRequestHandler {
             requestDefinition.headers().forEach(requestBodySpec::header);
         }
 
-        if (requestDefinition.auth() != null) {
+        if (requestDefinition.auth() != null && !requestDefinition.auth().type().equals(AUTH_TYPE_NONE)) {
             Map.Entry<String, String> authHeader = AuthHeaderCreator.createAuthHeader(requestDefinition.auth());
             requestBodySpec.header(authHeader.getKey(), authHeader.getValue());
         }
 
-        return requestBodySpec.retrieve().toEntity(String.class);
+        return requestBodySpec
+                .retrieve()
+                // Never throw errors here, we just want to know what is returned
+                .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {})
+                .onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {})
+                .toEntity(String.class);
     }
 
 }

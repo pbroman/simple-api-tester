@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import dev.pbroman.simple.api.tester.records.Auth;
 
+import static dev.pbroman.simple.api.tester.records.Auth.AUTH_TYPE_NONE;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class AuthHeaderCreator {
@@ -17,6 +18,7 @@ public class AuthHeaderCreator {
             case BASIC -> createBasicAuthHeader(auth.username(), auth.password());
             case BEARER -> createBearerAuthHeader(auth.token());
             case API_KEY -> createApiKeyAuthHeader(auth.token());
+            case AUTH_TYPE_NONE -> null;
             default -> throw new IllegalArgumentException("Unknown auth type: " + auth.type());
         };
     }

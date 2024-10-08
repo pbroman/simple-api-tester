@@ -1,4 +1,4 @@
-package dev.pbroman.simple.api.tester.helper;
+package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.handler.SnakeYamlConfigLoader;
 import org.junit.jupiter.api.Test;

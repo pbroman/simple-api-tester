@@ -11,8 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class TestSuiteRunnerTest {
@@ -39,16 +38,21 @@ class TestSuiteRunnerTest {
 
     @Test
     void run() throws IOException {
-        //given
+        // given
         var testSuiteRuntime = configProcessor.loadConfig("classpath:crudApiSpec.yaml", null);
         testSuiteRuntime.runtimeData().env().put("baseUrl", "http://localhost:8080");
 
-        //when
+        // when
         var testResults = testSuiteRunner.run(testSuiteRuntime);
 
-        //then
+        // then
         assertNotNull(testResults);
         assertEquals(testSuiteRuntime.testSuite().subSuites().size(), testResults.size());
+          // check there are no failing assertions
+        testResults.forEach(
+                (suite, results) -> results.forEach(
+                        result -> result.assertionResults().forEach(
+                                assertion -> assertTrue(assertion.passed()))) );
     }
 
 }

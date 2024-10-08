@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,10 +66,10 @@ public class CrudApplication {
         throw new ResourceNotFoundException("User with id " + id + " not found");
     }
 
-    @GetMapping( path = "/search/{displayName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<User> searchUser(@PathVariable String displayName) {
+    @GetMapping( path = "/search/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<User> searchUser(@PathVariable String username) {
         return database.values().stream()
-                .filter(user -> user.displayName().equals(displayName))
+                .filter(user -> user.username().equals(username))
                 .collect(Collectors.toList());
     }
 
@@ -79,14 +78,19 @@ public class CrudApplication {
         return new ArrayList<>(database.values());
     }
 
-    @PostMapping( path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping( path = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public User updateUser(@RequestBody String body) throws JsonProcessingException {
         var user = objectMapper.readValue(body, User.class);
         if (user.id == null) {
             throw new BadRequest("User id must be provided");
         }
         if (database.containsKey(user.id)) {
-            user = database.get(user.id).withDisplayName(user.displayName);
+            if (user.username != null) {
+                if (searchUserInDB(user.username) != null) {
+                    throw new ResourceAlreadyPresent("User with username " + user.username + " already exists");
+                }
+                user = database.get(user.id).withUsername(user.username);
+            }
             database.put(user.id, user);
             return user;
         } else {
@@ -127,9 +131,9 @@ public class CrudApplication {
      * Resources
      */
 
-    public record User(String id, String username, String displayName) {
-        public User withId(String id) { return new User(id, username, displayName); }
-        public User withDisplayName(String displayName) { return new User(id, username, displayName); }
+    public record User(String id, String username) {
+        public User withId(String id) { return new User(id, username); }
+        public User withUsername(String username) { return new User(id, username); }
     }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
