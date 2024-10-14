@@ -1,5 +1,6 @@
 package dev.pbroman.simple.api.tester.util;
 
+import dev.pbroman.simple.api.tester.exception.ValidationException;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -77,7 +78,11 @@ public class Interpolation {
 
                 case VARS:
                     guardVarSingleKey(parts);
-                    valuesList.add(runtimeData.vars().get(parts[1]).toString());
+                    if (runtimeData.vars().get(parts[1]) != null) {
+                        valuesList.add(runtimeData.vars().get(parts[1]).toString());
+                    } else {
+                        throw new ValidationException("The variable " + parts[1] + " has not been set");
+                    }
                     break;
 
                 case ENV:
@@ -163,10 +168,11 @@ public class Interpolation {
                     } else if (json.get(varPart) instanceof String) {
                         return json.getString(varPart);
                     } else {
-                        throw new IllegalArgumentException("Unknown type of json value: " + json.get(varPart));
+                        throw new IllegalArgumentException("Unknown type of json value: " + json.get(varPart) + " in body " + body);
                     }
                 } catch (JSONException e) {
-                    throw new IllegalArgumentException("Invalid json path request of response body", e);
+                    throw new ValidationException("Could not find the json path in the response body. Path: "
+                            + StringUtils.joinWith(".", parts) + ", body: " + body, e);
                 }
             }
             else if (parts[i].startsWith("_")) {

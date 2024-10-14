@@ -11,8 +11,12 @@ public record Request(
     ) {
 
     public Request {
-        Objects.requireNonNull(metadata, "Request metadata cannot be null");
-        Objects.requireNonNull(requestDefinition, "Request definition cannot be null");
+        if (metadata == null) {
+            throw new IllegalArgumentException("Request metadata cannot be null");
+        }
+        if (requestDefinition == null) {
+            throw new IllegalArgumentException("Request definition cannot be null");
+        }
     }
 
     public Request withRequestDefinition(RequestDefinition requestDefinition) {

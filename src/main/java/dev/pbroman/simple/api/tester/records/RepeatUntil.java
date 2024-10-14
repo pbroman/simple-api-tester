@@ -10,7 +10,9 @@ import static dev.pbroman.simple.api.tester.util.Constants.DEFAULT_MAX_ATTEMPTS;
 public record RepeatUntil(Condition condition, Integer maxAttempts, Integer waitBetweenAttempts, String messageOnFail) {
 
     public RepeatUntil {
-        Objects.requireNonNull(condition, "Condition cannot be null");
+        if (condition == null) {
+            throw new IllegalArgumentException("Condition for repeatUntil cannot be null");
+        }
         if (maxAttempts == null) {
             maxAttempts = DEFAULT_MAX_ATTEMPTS;
         }

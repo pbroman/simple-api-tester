@@ -5,6 +5,8 @@ import java.util.Objects;
 public record Metadata(String name, String description) {
 
     public Metadata {
-        Objects.requireNonNull(name, "Metadata name cannot be null");
+        if (name == null) {
+            throw new IllegalArgumentException("Metadata name cannot be null");
+        }
     }
 }

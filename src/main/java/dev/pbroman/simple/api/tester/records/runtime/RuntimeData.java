@@ -23,7 +23,7 @@ public record RuntimeData(
         Map<String, Object> vars,
         Map<String, Object> responseVars,
         TestSuite currentTestSuite,
-        Map<TestSuite, List<TestResult>> testResults
+        Map<TestSuite, List<Object>> results
     ) {
 
     public RuntimeData {
@@ -36,8 +36,8 @@ public record RuntimeData(
         if (responseVars == null) {
             responseVars = new HashMap<>();
         }
-        if (testResults == null) {
-            testResults = new HashMap<>();
+        if (results == null) {
+            results = new HashMap<>();
         }
     }
 
@@ -63,15 +63,15 @@ public record RuntimeData(
                 }
             }
         }
-        return new RuntimeData(constants, env, vars, newResponseVars, currentTestSuite, testResults);
+        return new RuntimeData(constants, env, vars, newResponseVars, currentTestSuite, results);
     }
 
     public RuntimeData withCurrentTestSuite(TestSuite testSuite) {
-        return new RuntimeData(constants, env, vars, responseVars, testSuite, testResults);
+        return new RuntimeData(constants, env, vars, responseVars, testSuite, results);
     }
 
     public void addTestResult(TestResult testResult) {
-        testResults.computeIfAbsent(currentTestSuite, k -> new ArrayList<>());
-        testResults.get(currentTestSuite).add(testResult);
+        results.computeIfAbsent(currentTestSuite, k -> new ArrayList<>());
+        results.get(currentTestSuite).add(testResult);
     }
 }

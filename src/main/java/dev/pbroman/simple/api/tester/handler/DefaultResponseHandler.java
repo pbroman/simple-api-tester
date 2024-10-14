@@ -17,22 +17,18 @@ import java.util.List;
 @Component
 public class DefaultResponseHandler implements ResponseHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultResponseHandler.class);
-
     @Override
     public List<AssertionResult> handleResponse(ResponseHandling responseHandling, RuntimeData runtimeData) {
 
         var assertionResults = new ArrayList<AssertionResult>();
 
         responseHandling.assertions().forEach(condition -> {
-            log.debug("Evaluating condition: {}", condition);
             var interpolatedCondition = condition.interpolated(runtimeData);
             var passed = ConditionResolver.resolve(interpolatedCondition);
             assertionResults.add(new AssertionResult(condition, interpolatedCondition, passed));
         });
 
         responseHandling.setVars().forEach((key, value) -> {
-            log.debug("Setting variable: {} = {}", key, value);
             runtimeData.vars().put(key, Interpolation.interpolate(value, runtimeData));
         });
 

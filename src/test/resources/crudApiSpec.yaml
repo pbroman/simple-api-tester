@@ -308,7 +308,7 @@ subSuites:
               other: "204"
               message: Status code must be 204
             - value: ${response.json}
-              operation: 'null'
+              operation: isNull
               message: Response body must be null
       - metadata:
           name: Delete first again

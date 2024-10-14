@@ -18,9 +18,11 @@ public record TestSuite(
     ) {
 
     public TestSuite {
-        Objects.requireNonNull(metadata, "TestSuite metadata cannot be null");
+        if (metadata == null) {
+            throw new IllegalArgumentException("The test suite metadata cannot be null");
+        }
         if (requests == null && subSuites == null) {
-            throw new IllegalArgumentException("TestSuite must have at least one request or subSuite");
+            throw new IllegalArgumentException("A test suite must have at least one request or subsuite");
         }
         if (defaultTimeout == null) {
             defaultTimeout = DEFAULT_TIMEOUT_MS;

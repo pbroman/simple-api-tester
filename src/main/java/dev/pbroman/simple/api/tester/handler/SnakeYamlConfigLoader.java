@@ -34,17 +34,12 @@ public class SnakeYamlConfigLoader implements ConfigLoader {
     }
 
     public TestSuite loadTestSuite(String location) throws IOException {
-        log.debug("Loading test suite from {}", location);
         var jsonString = locationToYaml(location);
-
-
-
         return objectMapper.readValue(jsonString, TestSuite.class);
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, String> loadEnv(String location) throws IOException {
-        log.debug("Loading env from {}", location);
         var jsonString = locationToYaml(location);
         return objectMapper.readValue(jsonString, Map.class);
     }

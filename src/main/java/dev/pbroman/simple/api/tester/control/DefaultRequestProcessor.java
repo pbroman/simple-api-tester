@@ -11,13 +11,11 @@ import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 
-@Component
 public class DefaultRequestProcessor implements RequestProcessor {
 
     private static final Logger protocol = LoggerFactory.getLogger(PROTOCOL_LOGGER);

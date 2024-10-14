@@ -1,5 +1,6 @@
 package dev.pbroman.simple.api.tester.control;
 
+import dev.pbroman.simple.api.tester.records.result.TestResult;
 import dev.pbroman.simple.api.tester.testapp.CrudApplication;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestSuiteRunnerTest {
 
     @Autowired
-    private DefaultConfigProcessor configProcessor;
+    private ValidatingConfigProcessor configProcessor;
 
     @Autowired
     private TestSuiteRunner testSuiteRunner;
@@ -51,7 +52,7 @@ class TestSuiteRunnerTest {
           // check there are no failing assertions
         testResults.forEach(
                 (suite, results) -> results.forEach(
-                        result -> result.assertionResults().forEach(
+                        result -> ((TestResult) result).assertionResults().forEach(
                                 assertion -> assertTrue(assertion.passed()))) );
     }
 

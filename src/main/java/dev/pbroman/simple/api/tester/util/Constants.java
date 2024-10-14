@@ -4,7 +4,8 @@ import dev.pbroman.simple.api.tester.records.Auth;
 
 public class Constants {
 
-    public static final String PROTOCOL_LOGGER = "protocol";
+    public static final String PROTOCOL_LOGGER = "simple-api-tester-protocol";
+    public static final String VALIDATION_LOGGER = "simple-api-tester-validation";
 
     public static final String CONSTANTS = "constants";
     public static final String HEADERS = "headers";

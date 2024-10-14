@@ -6,7 +6,6 @@ import dev.pbroman.simple.api.tester.records.result.TestResult;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 import static dev.pbroman.simple.api.tester.util.Inheritance.collectionInheritance;
 import static dev.pbroman.simple.api.tester.util.Inheritance.requestInheritance;
 
-@Component
 public class TestSuiteRunner {
 
     private static final Logger protocol = LoggerFactory.getLogger(PROTOCOL_LOGGER);
@@ -26,7 +24,7 @@ public class TestSuiteRunner {
         this.requestProcessor = requestProcessor;
     }
 
-    public Map<TestSuite, List<TestResult>> run(TestSuiteRuntime testSuiteRuntime) {
+    public Map<TestSuite, List<Object>> run(TestSuiteRuntime testSuiteRuntime) {
 
         var testSuite = testSuiteRuntime.testSuite();
         var runtimeData = testSuiteRuntime.runtimeData();
@@ -45,6 +43,6 @@ public class TestSuiteRunner {
             });
         }
 
-        return runtimeData.testResults();
+        return runtimeData.results();
     }
 }

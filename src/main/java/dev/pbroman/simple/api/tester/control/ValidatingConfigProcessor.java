@@ -7,10 +7,15 @@ import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
+import static dev.pbroman.simple.api.tester.config.ApiTesterConfig.VALIDATION_STACK;
+import static dev.pbroman.simple.api.tester.control.ValidationRequestProcessor.VALIDATION_ERRORS;
+import static dev.pbroman.simple.api.tester.util.Constants.VALIDATION_LOGGER;
 import static dev.pbroman.simple.api.tester.util.Inheritance.collectionInheritance;
 import static dev.pbroman.simple.api.tester.util.Inheritance.requestInheritance;
 
@@ -19,14 +24,16 @@ import static dev.pbroman.simple.api.tester.util.Inheritance.requestInheritance;
  * validating the configuration, and resolves constants and env values set in the configuration.
  */
 @Component
-public class DefaultConfigProcessor implements ConfigProcessor {
+public class ValidatingConfigProcessor implements ConfigProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultConfigProcessor.class);
+    private static final Logger validationLog = LoggerFactory.getLogger(VALIDATION_LOGGER);
 
     private final ConfigLoader configLoader;
+    private final TestSuiteRunner validationTestSuiteRunner;
 
-    public DefaultConfigProcessor(ConfigLoader configLoader) {
+    public ValidatingConfigProcessor(ConfigLoader configLoader, @Qualifier(VALIDATION_STACK) TestSuiteRunner testSuiteRunner) {
         this.configLoader = configLoader;
+        this.validationTestSuiteRunner = testSuiteRunner;
     }
 
     /**
@@ -38,13 +45,26 @@ public class DefaultConfigProcessor implements ConfigProcessor {
      * @throws IOException if the config files cannot be read
      */
     @Override
-    public TestSuiteRuntime loadConfig(String testSuiteLocation, String envLocation) throws IOException {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public TestSuiteRuntime loadConfig(String testSuiteLocation, String envLocation) {
 
-        var testSuite = configLoader.loadTestSuite(testSuiteLocation);
-        var env = envLocation != null ? configLoader.loadEnv(envLocation) : null;
-        var runtimeData = new RuntimeData(testSuite.constants(), env);
+        try {
+            var testSuite = configLoader.loadTestSuite(testSuiteLocation);
+            var env = envLocation != null ? configLoader.loadEnv(envLocation) : null;
+            var runtimeData = new RuntimeData(testSuite.constants(), env);
 
-        return validate(testSuite, runtimeData);
+            var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData.withCurrentTestSuite(testSuite));
+            validationTestSuiteRunner.run(testSuiteRuntime);
+            if (testSuiteRuntime.runtimeData().vars().get(VALIDATION_ERRORS) instanceof List errors) {
+                validationLog.error("There are validation errors:");
+                errors.forEach( e -> validationLog.error(e.toString()));
+                return null;
+            }
+            return testSuiteRuntime;
+        } catch (IOException e) {
+            validationLog.error(e.getMessage());
+        }
+        return null;
     }
 
     private TestSuiteRuntime validate(TestSuite testSuite, RuntimeData runtimeData) {

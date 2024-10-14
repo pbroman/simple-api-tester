@@ -12,7 +12,10 @@ public record Condition(String operation, Object value, Object other, String mes
     }
     
     public Condition {
-        Objects.requireNonNull(operation, "Operation cannot be null");
+        if (operation == null) {
+            throw new IllegalArgumentException("A condition operation cannot be null. " +
+                    "If you want the operation null in the yaml config, you must put it in quotes: 'null' or \"null\", or use isNull");
+        }
     }
 
     public Condition interpolated(RuntimeData runtimeData) {
