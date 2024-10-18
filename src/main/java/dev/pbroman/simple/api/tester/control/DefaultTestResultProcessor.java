@@ -2,7 +2,7 @@ package dev.pbroman.simple.api.tester.control;
 
 import dev.pbroman.simple.api.tester.api.MessageRenderer;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
-import dev.pbroman.simple.api.tester.records.result.TestResult;
+import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +16,10 @@ public class DefaultTestResultProcessor implements TestResultProcessor {
     }
 
     @Override
-    public void process(TestResult testResult, RuntimeData runtimeData) {
+    public void process(RequestResult requestResult, RuntimeData runtimeData) {
 
-        runtimeData.addTestResult(testResult);
-
-        System.out.println(messageRenderer.renderTestResultMessage(testResult));
-        testResult.assertionResults().forEach( assertion -> {
+        System.out.println(messageRenderer.renderTestResultMessage(requestResult));
+        requestResult.assertionResults().forEach(assertion -> {
             if (assertion.passed()) {
                 System.out.println("  " + messageRenderer.renderAssertionResultMessage(assertion));
             } else {

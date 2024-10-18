@@ -1,15 +1,11 @@
 package dev.pbroman.simple.api.tester.records.runtime;
 
-import dev.pbroman.simple.api.tester.records.TestSuite;
-import dev.pbroman.simple.api.tester.records.result.TestResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static dev.pbroman.simple.api.tester.util.Constants.BODY;
@@ -21,9 +17,7 @@ public record RuntimeData(
         Map<String, String> constants,
         Map<String, String> env,
         Map<String, Object> vars,
-        Map<String, Object> responseVars,
-        TestSuite currentTestSuite,
-        Map<TestSuite, List<Object>> results
+        Map<String, Object> responseVars
     ) {
 
     public RuntimeData {
@@ -36,13 +30,10 @@ public record RuntimeData(
         if (responseVars == null) {
             responseVars = new HashMap<>();
         }
-        if (results == null) {
-            results = new HashMap<>();
-        }
     }
 
     public RuntimeData(Map<String, String> constants, Map<String, String> env) {
-        this(constants, env, null, null, null, null);
+        this(constants, env, null, null);
     }
 
     public RuntimeData withHttpResponseVars(ResponseEntity<String> response) {
@@ -63,15 +54,7 @@ public record RuntimeData(
                 }
             }
         }
-        return new RuntimeData(constants, env, vars, newResponseVars, currentTestSuite, results);
+        return new RuntimeData(constants, env, vars, newResponseVars);
     }
 
-    public RuntimeData withCurrentTestSuite(TestSuite testSuite) {
-        return new RuntimeData(constants, env, vars, responseVars, testSuite, results);
-    }
-
-    public void addTestResult(TestResult testResult) {
-        results.computeIfAbsent(currentTestSuite, k -> new ArrayList<>());
-        results.get(currentTestSuite).add(testResult);
-    }
 }

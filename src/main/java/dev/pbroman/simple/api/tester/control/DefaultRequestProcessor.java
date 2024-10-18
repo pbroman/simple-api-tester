@@ -4,7 +4,7 @@ import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.ResponseHandler;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
-import dev.pbroman.simple.api.tester.records.result.TestResult;
+import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import dev.pbroman.simple.api.tester.records.Request;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
@@ -38,14 +38,15 @@ public class DefaultRequestProcessor implements RequestProcessor {
             return;
         }
 
-        var testResult = processInternal(request, runtimeData, 1);
-        testResultProcessor.process(testResult, runtimeData);
+        var requestResult = processInternal(request, runtimeData, 1);
+        request.requestResults().add(requestResult);
+        testResultProcessor.process(requestResult, runtimeData);
     }
 
-    private TestResult processInternal(Request request, RuntimeData runtimeData, int numAttempt) {
+    private RequestResult processInternal(Request request, RuntimeData runtimeData, int numAttempt) {
 
         var requestDefinition = request.requestDefinition().interpolated(runtimeData);
-        protocol.info("{}: {} {} ({})", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description());
+        protocol.info("{}: {} {} ({}), body: {}", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description(), requestDefinition.body());
 
         long startTime = System.currentTimeMillis();
         var response = httpRequestHandler.performRequest(requestDefinition);
@@ -56,7 +57,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
         runtimeData = runtimeData.withHttpResponseVars(response);
         var assertionResults = responseHandler.handleResponse(request.responseHandling(), runtimeData);
-        var testResult = new TestResult(request.metadata(), requestDefinition, response, numAttempt, roundTripTime, assertionResults);
+        var requestResult = new RequestResult(response, numAttempt, roundTripTime, assertionResults);
 
         /*
          * Flow control, using data from the response
@@ -81,6 +82,6 @@ public class DefaultRequestProcessor implements RequestProcessor {
             }
         }
 
-        return testResult;
+        return requestResult;
     }
 }

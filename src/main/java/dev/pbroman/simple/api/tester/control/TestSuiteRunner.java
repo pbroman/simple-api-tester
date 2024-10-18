@@ -2,7 +2,6 @@ package dev.pbroman.simple.api.tester.control;
 
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.records.TestSuite;
-import dev.pbroman.simple.api.tester.records.result.TestResult;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public class TestSuiteRunner {
         this.requestProcessor = requestProcessor;
     }
 
-    public Map<TestSuite, List<Object>> run(TestSuiteRuntime testSuiteRuntime) {
+    public void run(TestSuiteRuntime testSuiteRuntime) {
 
         var testSuite = testSuiteRuntime.testSuite();
         var runtimeData = testSuiteRuntime.runtimeData();
@@ -33,16 +32,17 @@ public class TestSuiteRunner {
 
         if (testSuite.subSuites() != null) {
             testSuite.subSuites().forEach(subSuite -> {
-                run(new TestSuiteRuntime(collectionInheritance(subSuite, testSuite), runtimeData.withCurrentTestSuite(subSuite)));
+                subSuite.validate();
+                run(new TestSuiteRuntime(collectionInheritance(subSuite, testSuite), runtimeData));
             });
         }
 
         if (testSuite.requests() != null) {
             testSuite.requests().forEach(request -> {
+                request.validate();
                 requestProcessor.processRequest(requestInheritance(request, testSuite), runtimeData);
             });
         }
 
-        return runtimeData.results();
     }
 }

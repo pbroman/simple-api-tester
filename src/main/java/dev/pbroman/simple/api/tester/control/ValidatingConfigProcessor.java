@@ -2,6 +2,9 @@ package dev.pbroman.simple.api.tester.control;
 
 import dev.pbroman.simple.api.tester.api.ConfigLoader;
 import dev.pbroman.simple.api.tester.api.ConfigProcessor;
+import dev.pbroman.simple.api.tester.records.Metadata;
+import dev.pbroman.simple.api.tester.records.result.Validation;
+import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
@@ -11,13 +14,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static dev.pbroman.simple.api.tester.config.ApiTesterConfig.VALIDATION_STACK;
-import static dev.pbroman.simple.api.tester.control.ValidationRequestProcessor.VALIDATION_ERRORS;
 import static dev.pbroman.simple.api.tester.util.Constants.VALIDATION_LOGGER;
-import static dev.pbroman.simple.api.tester.util.Inheritance.collectionInheritance;
-import static dev.pbroman.simple.api.tester.util.Inheritance.requestInheritance;
 
 /**
  * The @ConfigProcessor runs through the entire test suite, setting inherited values where necessary,
@@ -45,7 +46,6 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
      * @throws IOException if the config files cannot be read
      */
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public TestSuiteRuntime loadConfig(String testSuiteLocation, String envLocation) {
 
         try {
@@ -53,35 +53,49 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
             var env = envLocation != null ? configLoader.loadEnv(envLocation) : null;
             var runtimeData = new RuntimeData(testSuite.constants(), env);
 
-            var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData.withCurrentTestSuite(testSuite));
+            var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData);
             validationTestSuiteRunner.run(testSuiteRuntime);
-            if (testSuiteRuntime.runtimeData().vars().get(VALIDATION_ERRORS) instanceof List errors) {
-                validationLog.error("There are validation errors:");
-                errors.forEach( e -> validationLog.error(e.toString()));
-                return null;
+
+            if (isValid(testSuite)) {
+                return testSuiteRuntime;
             }
-            return testSuiteRuntime;
         } catch (IOException e) {
             validationLog.error(e.getMessage());
         }
         return null;
     }
 
-    private TestSuiteRuntime validate(TestSuite testSuite, RuntimeData runtimeData) {
+    private boolean isValid(TestSuite testSuite) {
+        var validations = new ArrayList<Validation>();
+        collectValidations(testSuite, validations);
+        testSuite.subSuites().forEach(subSuite -> {
+            collectValidations(subSuite, validations);
+        });
 
-        if (testSuite.subSuites() != null) {
-            testSuite.subSuites().forEach(subSuite -> {
-                validate(collectionInheritance(subSuite, testSuite), runtimeData);
-            });
+        var fails = validations.stream().filter(validation -> validation.validationType().equals(ValidationType.FAIL)).toList();
+        var warns = validations.stream().filter(validation -> validation.validationType().equals(ValidationType.WARN)).toList();
+
+        validationLog.info("Validations: {} WARN, {} FAIL", warns.size(), fails.size());
+
+        return fails.isEmpty();
+    }
+
+    private void collectValidations(TestSuite testSuite, List<Validation> validations) {
+        testSuite.validations().forEach(validation -> logValidation(testSuite.metadata(), validation));
+        validations.addAll(testSuite.validations());
+        testSuite.requests().forEach(request -> {
+            request.validations().forEach(validation -> logValidation(request.metadata(), validation));
+            validations.addAll(request.validations());
+        });
+
+    }
+
+    private void logValidation(Metadata metadata, Validation validation) {
+        var prefix = metadata != null ? metadata.name() + ": " : "Anonymous: ";
+        switch (validation.validationType()) {
+            case WARN -> validationLog.warn(prefix + validation);
+            case FAIL -> validationLog.error(prefix + validation);
         }
-
-        if (testSuite.requests() != null) {
-            testSuite.requests().forEach(request -> {
-                requestInheritance(request, testSuite);
-            });
-        }
-
-        return new TestSuiteRuntime(testSuite, runtimeData.withCurrentTestSuite(testSuite));
     }
 
 }

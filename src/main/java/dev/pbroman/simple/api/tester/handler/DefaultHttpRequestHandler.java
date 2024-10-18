@@ -1,7 +1,9 @@
 package dev.pbroman.simple.api.tester.handler;
 
 import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
+import dev.pbroman.simple.api.tester.exception.ValidationException;
 import dev.pbroman.simple.api.tester.records.RequestDefinition;
+import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.util.AuthHeaderCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,6 @@ import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 public class DefaultHttpRequestHandler implements HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpRequestHandler.class);
-    private static final Logger protocol = LoggerFactory.getLogger(PROTOCOL_LOGGER);
 
     private static final List<RequestMethod> METHODS_WITH_BODY = List.of(RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH);
 
@@ -51,6 +52,9 @@ public class DefaultHttpRequestHandler implements HttpRequestHandler {
                 .uri(requestDefinition.url());
 
         if (METHODS_WITH_BODY.contains(method) && requestDefinition.body() != null)  {
+            if (requestDefinition.body().get(BODY_STRING) == null) {
+                throw new ValidationException("No body string found in request body", ValidationType.FAIL);
+            }
             requestBodySpec.body(requestDefinition.body().get(BODY_STRING));
         }
 

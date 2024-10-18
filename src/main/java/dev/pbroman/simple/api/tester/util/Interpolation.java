@@ -1,6 +1,7 @@
 package dev.pbroman.simple.api.tester.util;
 
 import dev.pbroman.simple.api.tester.exception.ValidationException;
+import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -81,7 +82,7 @@ public class Interpolation {
                     if (runtimeData.vars().get(parts[1]) != null) {
                         valuesList.add(runtimeData.vars().get(parts[1]).toString());
                     } else {
-                        throw new ValidationException("The variable " + parts[1] + " has not been set");
+                        throw new ValidationException("The variable " + parts[1] + " has not been set", ValidationType.WARN);
                     }
                     break;
 
@@ -148,7 +149,7 @@ public class Interpolation {
             return null;
         }
         if (!(body instanceof JSONObject) && !(body instanceof JSONArray)) {
-            throw new IllegalArgumentException("Invalid json in response body");
+            throw new IllegalArgumentException("The body is neither a JSONObject or a JSONArray, cannot get a json value from it. Body class: " + body.getClass());
         }
         var json = new JSONObject().put("json", body);
         for (int i = 0; i < parts.length; i++) {
@@ -172,7 +173,7 @@ public class Interpolation {
                     }
                 } catch (JSONException e) {
                     throw new ValidationException("Could not find the json path in the response body. Path: "
-                            + StringUtils.joinWith(".", parts) + ", body: " + body, e);
+                            + StringUtils.joinWith(".", (Object[]) parts) + ", body: " + body, ValidationType.WARN, e);
                 }
             }
             else if (parts[i].startsWith("_")) {

@@ -2,7 +2,7 @@ package dev.pbroman.simple.api.tester.handler;
 
 import dev.pbroman.simple.api.tester.api.MessageRenderer;
 import dev.pbroman.simple.api.tester.records.result.AssertionResult;
-import dev.pbroman.simple.api.tester.records.result.TestResult;
+import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -16,19 +16,19 @@ public class CheapMessageRenderer implements MessageRenderer {
     @Value("${simple-api-tester.assertion-result-template}")
     private String assertionResultTemplate;
 
-    public String renderTestResultMessage(TestResult testResult) {
-        var response = (ResponseEntity<?>) testResult.response();
+    public String renderTestResultMessage(RequestResult requestResult) {
+        var response = (ResponseEntity<?>) requestResult.response();
         // Yeah, this is cheap. It is supposed to be cheap. :)
         return testResultTemplate
-                .replaceAll("<request.name>", replacementSafe(testResult.requestMetadata().name()))
-                .replaceAll("<request.url>", replacementSafe(testResult.requestDefinition().url()))
-                .replaceAll("<request.method>", replacementSafe(testResult.requestDefinition().method()))
-                .replaceAll("<request.authType>", replacementSafe(testResult.requestDefinition().auth().type()))
+//                .replaceAll("<request.name>", replacementSafe(requestResult.requestMetadata().name()))
+//                .replaceAll("<request.url>", replacementSafe(requestResult.requestDefinition().url()))
+//                .replaceAll("<request.method>", replacementSafe(requestResult.requestDefinition().method()))
+//                .replaceAll("<request.authType>", replacementSafe(requestResult.requestDefinition().auth().type()))
                 .replaceAll("<response>", replacementSafe(response))
                 .replaceAll("<response.status>", replacementSafe(response.getStatusCode()))
                 .replaceAll("<response.statusCode>", replacementSafe(response.getStatusCode().value()))
-                .replaceAll("<request.rtt>", replacementSafe(testResult.roundTripTime()))
-                .replaceAll("<request.numAttempts?>", replacementSafe(testResult.numAttempt()))
+                .replaceAll("<request.rtt>", replacementSafe(requestResult.roundTripTime()))
+                .replaceAll("<request.numAttempts?>", replacementSafe(requestResult.numAttempt()))
             ;
     }
 

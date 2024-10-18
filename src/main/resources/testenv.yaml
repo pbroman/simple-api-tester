@@ -1,8 +1,0 @@
-dev:
-  baseUrl: https://scim-proxy.dev.cornelsen.de
-  clientId: 1
-  clientSecret: 0815
-stage:
-  baseUrl: https://scim-proxy.stage.cornelsen.de
-  clientId: 1
-  clientSecret: 0815

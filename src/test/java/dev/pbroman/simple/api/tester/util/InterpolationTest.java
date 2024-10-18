@@ -38,7 +38,7 @@ class InterpolationTest {
                 BODY, responseBody,
                 JSON, new JSONObject(responseBody)
         );
-        runtimeData = new RuntimeData(constants, env, variables, responseVars, null, null);
+        runtimeData = new RuntimeData(constants, env, variables, responseVars);
     }
 
     @Test
@@ -86,7 +86,7 @@ class InterpolationTest {
     @Test
     void emptyResponseJson() {
         // given
-        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONObject()), null, null);
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONObject()));
 
         // when
         var result = Interpolation.interpolate("${response.json}", runtimeData);
@@ -99,7 +99,7 @@ class InterpolationTest {
     @Test
     void emptyArrayResponseJson() {
         // given
-        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray()), null, null);
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray()));
 
         // when
         var result = Interpolation.interpolate("${response.json}", runtimeData);
@@ -113,7 +113,7 @@ class InterpolationTest {
     void arrayResponseJson() {
         // given
         String jsonArray = "[{\"foo\": \"bar\"}]";
-        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)), null, null);
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)));
 
         // when
         var result = Interpolation.interpolate("${response.json[0].foo}", runtimeData);
@@ -136,7 +136,7 @@ class InterpolationTest {
                     }
                 }]
             """;
-        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)), null, null);
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, new JSONArray(jsonArray)));
 
         // when
         var result = Interpolation.interpolate("${response.json[2].object.array[1].moo}", runtimeData);
@@ -149,7 +149,7 @@ class InterpolationTest {
     @Test
     void invalidResponseJson() {
         // given
-        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, "invalid"), null, null);
+        var runtimeData = new RuntimeData(Map.of(), Map.of(), Map.of(), Map.of(JSON, "invalid"));
 
         // then
         assertThrows(IllegalArgumentException.class,
