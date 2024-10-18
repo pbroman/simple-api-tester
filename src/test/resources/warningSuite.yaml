@@ -1,0 +1,48 @@
+metadata:
+  name: warningSuite
+  description: A test suite covering all validation warnings
+requests:
+  # A request with no metadata
+  - requestDefinition:
+      url: "http://example.com"
+      method: GET
+  - metadata:
+      name: no content-type for POST
+    requestDefinition:
+      url: "http://example.com"
+      method: POST
+      body:
+        raw: ""
+  - metadata:
+      name: no content-type for PUT
+    requestDefinition:
+      url: "http://example.com"
+      method: PUT
+      body:
+        raw: ""
+  - metadata:
+      name: no content-type for PATCH
+    requestDefinition:
+      url: "http://example.com"
+      method: PATCH
+      body:
+        raw: ""
+  - metadata:
+      name: invalid url
+    requestDefinition:
+      url: "bollocks"
+      method: GET
+
+subSuites:
+  - metadata:
+      name: subsuite with no content
+      description: This should generate a warning for empty suite
+  - metadata:
+      description: subsuite with no name
+    requests:
+      - metadata:
+          name: trying to interpolate a non-present variable
+        requestDefinition:
+          url: "http://localhost:8080/${vars.non-present}"
+          method: GET
+

@@ -4,7 +4,9 @@ import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.ResponseHandler;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
+import dev.pbroman.simple.api.tester.exception.ValidationException;
 import dev.pbroman.simple.api.tester.records.result.RequestResult;
+import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import dev.pbroman.simple.api.tester.records.Request;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
@@ -12,6 +14,9 @@ import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
@@ -47,6 +52,11 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
         var requestDefinition = request.requestDefinition().interpolated(runtimeData);
         protocol.info("{}: {} {} ({}), body: {}", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description(), requestDefinition.body());
+        try {
+            new URI(requestDefinition.url());
+        } catch (URISyntaxException e) {
+            throw new ValidationException("Invalid URL: " + requestDefinition.url(), ValidationType.FAIL, e);
+        }
 
         long startTime = System.currentTimeMillis();
         var response = httpRequestHandler.performRequest(requestDefinition);

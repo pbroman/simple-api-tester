@@ -10,10 +10,16 @@ import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import dev.pbroman.simple.api.tester.util.Interpolation;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 
 import static dev.pbroman.simple.api.tester.util.Constants.*;
 
 public class ValidationRequestProcessor implements RequestProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(ValidationRequestProcessor.class);
 
     public static final String CONDITION_RESOLVER_COMPONENT = "ConditionResolver";
     public static final String CONDITION_INTERPOLATION_COMPONENT = "ConditionInterpolation";
@@ -32,20 +38,33 @@ public class ValidationRequestProcessor implements RequestProcessor {
             validateConditionResolving(request, interpolatedCondition);
         }
 
-        request.responseHandling().assertions().forEach(condition -> {
-            var interpolatedCondition = validateConditionInterpolation(request, condition, runtimeData);
-            validateConditionResolving(request, interpolatedCondition);
-        });
-
-        request.responseHandling().setVars().forEach((key, value) -> {
+        if (request.requestDefinition() != null) {
             try {
-                runtimeData.vars().put(key, Interpolation.interpolate(value, runtimeData));
+                request.requestDefinition().interpolated(runtimeData);
+                new URI(request.requestDefinition().url()).toURL();
             } catch (ValidationException e) {
-                request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), e.getValidationType()));
+                request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), e.getValidationType()));
             } catch (Exception e) {
-                request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), ValidationType.FAIL));
+                request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), ValidationType.FAIL));
             }
-        });
+        }
+
+        if (request.responseHandling() != null) {
+            request.responseHandling().assertions().forEach(condition -> {
+                var interpolatedCondition = validateConditionInterpolation(request, condition, runtimeData);
+                validateConditionResolving(request, interpolatedCondition);
+            });
+            request.responseHandling().setVars().forEach((key, value) -> {
+                try {
+                    runtimeData.vars().put(key, Interpolation.interpolate(value, runtimeData));
+                } catch (ValidationException e) {
+                    request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), e.getValidationType()));
+                } catch (Exception e) {
+                    request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), ValidationType.FAIL));
+                }
+            });
+        }
+
 
         if (request.flowControl() != null) {
             try {

@@ -1,0 +1,24 @@
+metadata:
+  name: failingSuite
+  description: A test suite covering all validation fails
+requests:
+  - metadata:
+      name: invalid url
+    requestDefinition:
+      url: "bollocks"
+      method: GET
+
+subSuites:
+  # test suite with no metadata
+  - requests:
+      - metadata:
+          name: invalid method
+        requestDefinition:
+          url: "http://example.com"
+          method: PUST
+      - metadata:
+          name: missing method
+        requestDefinition:
+          url: "http://example.com"
+
+

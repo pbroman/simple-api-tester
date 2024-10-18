@@ -94,9 +94,9 @@ public record RequestDefinition(
 
     @Override
     public RequestDefinition interpolated(RuntimeData runtimeData) {
-        var interpolatedUrl = Interpolation.interpolate(url, runtimeData).toString();
-        var interpolatedMethod = Interpolation.interpolate(method, runtimeData).toString();
-        var interpolatedTimeout = Interpolation.interpolate(timeout, runtimeData).toString();
+        var interpolatedUrl = String.valueOf(Interpolation.interpolate(url, runtimeData));
+        var interpolatedMethod = String.valueOf(Interpolation.interpolate(method, runtimeData));
+        var interpolatedTimeout = String.valueOf(Interpolation.interpolate(timeout, runtimeData));
         var interpolatedBody = Interpolation.interpolateMap(body, runtimeData);
         var interpolatedAuth = auth != null ? auth.interpolated(runtimeData) : null;
         var interpolatedHeaders = Interpolation.interpolateMap(headers, runtimeData);

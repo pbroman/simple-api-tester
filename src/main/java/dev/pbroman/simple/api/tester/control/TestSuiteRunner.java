@@ -28,7 +28,7 @@ public class TestSuiteRunner {
         var testSuite = testSuiteRuntime.testSuite();
         var runtimeData = testSuiteRuntime.runtimeData();
 
-        protocol.info("Test suite: {} ({})", testSuite.metadata().name(), testSuite.metadata().description());
+//        protocol.info("Test suite: {} ({})", testSuite.metadata().name(), testSuite.metadata().description());
 
         if (testSuite.subSuites() != null) {
             testSuite.subSuites().forEach(subSuite -> {

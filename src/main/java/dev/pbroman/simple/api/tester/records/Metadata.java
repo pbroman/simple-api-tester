@@ -14,7 +14,7 @@ public record Metadata(String name, String description) implements ConfigRecord 
         var validations = new ArrayList<Validation>();
         if (name == null) {
             var message = "Metadata name is null - this will make it very difficult for you to locate failing test requests";
-            validations.add(new Validation(this.getClass().getSimpleName(), null, message, ValidationType.WARN));
+            validations.add(new Validation(this.getClass().getSimpleName(), "Anonymous", message, ValidationType.WARN));
         }
         return validations;
     }

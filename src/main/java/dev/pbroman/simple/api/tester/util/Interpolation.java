@@ -172,8 +172,8 @@ public class Interpolation {
                         throw new IllegalArgumentException("Unknown type of json value: " + json.get(varPart) + " in body " + body);
                     }
                 } catch (JSONException e) {
-                    throw new ValidationException("Could not find the json path in the response body. Path: "
-                            + StringUtils.joinWith(".", (Object[]) parts) + ", body: " + body, ValidationType.WARN, e);
+                    log.warn("Could not find the json path in the response body. Path: {}, body: {}", StringUtils.joinWith(".", (Object[]) parts), body, e);
+                    return null;
                 }
             }
             else if (parts[i].startsWith("_")) {

@@ -62,8 +62,15 @@ public record TestSuite(
     }
 
     private Validation validation(String message, ValidationType validationType) {
-        var instanceName = metadata != null ? metadata.name() : null;
+        var instanceName = metadata != null && metadata.name() != null ? metadata.name() : "Anonymous test suite";
         return new Validation(this.getClass().getSimpleName(), instanceName, message, validationType);
+    }
+
+    public List<Validation> getAllValidations() {
+        var allValidations = new ArrayList<>(validations);
+        requests.forEach(request -> allValidations.addAll(request.validations()));
+        subSuites.forEach(subSuite -> allValidations.addAll(subSuite.getAllValidations()));
+        return allValidations;
     }
 
 

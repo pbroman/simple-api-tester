@@ -56,20 +56,21 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
             var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData);
             validationTestSuiteRunner.run(testSuiteRuntime);
 
-            if (isValid(testSuite)) {
-                return testSuiteRuntime;
+            if (!isValid(testSuite)) {
+                validationLog.error("Test suite is invalid");
             }
+            return testSuiteRuntime;
         } catch (IOException e) {
-            validationLog.error(e.getMessage());
+            validationLog.error(e.getMessage(), e);
         }
         return null;
     }
 
     private boolean isValid(TestSuite testSuite) {
         var validations = new ArrayList<Validation>();
-        collectValidations(testSuite, validations);
+        collectAndLogValidations(testSuite, validations);
         testSuite.subSuites().forEach(subSuite -> {
-            collectValidations(subSuite, validations);
+            collectAndLogValidations(subSuite, validations);
         });
 
         var fails = validations.stream().filter(validation -> validation.validationType().equals(ValidationType.FAIL)).toList();
@@ -80,7 +81,7 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
         return fails.isEmpty();
     }
 
-    private void collectValidations(TestSuite testSuite, List<Validation> validations) {
+    private void collectAndLogValidations(TestSuite testSuite, List<Validation> validations) {
         testSuite.validations().forEach(validation -> logValidation(testSuite.metadata(), validation));
         validations.addAll(testSuite.validations());
         testSuite.requests().forEach(request -> {
