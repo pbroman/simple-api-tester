@@ -1,24 +1,114 @@
 metadata:
   name: failingSuite
   description: A test suite covering all validation fails
+# requests for invalid requestDefinitions
 requests:
+  - metadata:
+      name: missing url
+    requestDefinition:
+      method: GET
   - metadata:
       name: invalid url
     requestDefinition:
       url: "bollocks"
       method: GET
+  - metadata:
+      name: missing method
+    requestDefinition:
+      url: "http://example.com"
+  - metadata:
+      name: invalid method
+    requestDefinition:
+      url: "http://example.com"
+      method: PUST
+  - metadata:
+      name: invalid json body
+    requestDefinition:
+      url: "http://example.com"
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        raw: non-json
+  - metadata:
+      name: invalid form body
+    requestDefinition:
+      url: "http://example.com"
+      method: POST
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      body: {}
+  - metadata:
+      name: missing POST body
+    requestDefinition:
+      url: "http://example.com"
+      method: POST
+# requests for other invalid stuff
+  - metadata:
+      name: missing condition operation
+    requestDefinition:
+      url: "http://example.com"
+      method: GET
+    responseHandling:
+      assertions:
+        - value: foo
+  - metadata:
+      name: invalid condition operation
+    requestDefinition:
+      url: "http://example.com"
+      method: GET
+    responseHandling:
+      assertions:
+        - value: foo
+          operation: null
 
 subSuites:
   # test suite with no metadata
+  # requests for invalid auth
   - requests:
-      - metadata:
-          name: invalid method
-        requestDefinition:
-          url: "http://example.com"
-          method: PUST
-      - metadata:
-          name: missing method
-        requestDefinition:
-          url: "http://example.com"
+    - metadata:
+        name: basic auth missing username
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          type: basic
+          password: password
+    - metadata:
+        name: basic auth missing password
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          type: basic
+          username: user
+    - metadata:
+        name: bearer auth missing token
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          type: bearer
+    - metadata:
+        name: apikey auth missing token
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          type: apikey
+    - metadata:
+        name: auth invalid type
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          type: moo
+    - metadata:
+        name: auth missing type
+      requestDefinition:
+        url: "http://example.com"
+        method: GET
+        auth:
+          username: boo
 
 

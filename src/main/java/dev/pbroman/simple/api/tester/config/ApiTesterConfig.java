@@ -4,8 +4,9 @@ import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.ResponseHandler;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
+import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
 import dev.pbroman.simple.api.tester.control.DefaultRequestProcessor;
-import dev.pbroman.simple.api.tester.control.TestSuiteRunner;
+import dev.pbroman.simple.api.tester.control.DefaultTestSuiteRunner;
 import dev.pbroman.simple.api.tester.control.ValidationRequestProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ public class ApiTesterConfig {
     @Primary
     @Qualifier(MAIN_STACK)
     public TestSuiteRunner testSuiteRunner(@Qualifier(MAIN_STACK) RequestProcessor requestProcessor) {
-        return new TestSuiteRunner(requestProcessor);
+        return new DefaultTestSuiteRunner(requestProcessor);
     }
 
     @Bean
@@ -42,7 +43,7 @@ public class ApiTesterConfig {
     @Bean
     @Qualifier(VALIDATION_STACK)
     public TestSuiteRunner validationTestSuiteRunner(@Qualifier(VALIDATION_STACK) RequestProcessor requestProcessor) {
-        return new TestSuiteRunner(requestProcessor);
+        return new DefaultTestSuiteRunner(requestProcessor);
     }
 
 }

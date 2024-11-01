@@ -2,6 +2,7 @@ package dev.pbroman.simple.api.tester.control;
 
 import dev.pbroman.simple.api.tester.api.ConfigLoader;
 import dev.pbroman.simple.api.tester.api.ConfigProcessor;
+import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
 import dev.pbroman.simple.api.tester.records.Metadata;
 import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;

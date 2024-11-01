@@ -95,6 +95,10 @@ public class ValidationRequestProcessor implements RequestProcessor {
         if (condition == null) {
             return;
         }
+        if (!condition.validate().isEmpty()) {
+            // Condition already invalid, no need to try to resolve it as well
+            return;
+        }
         try {
             ConditionResolver.resolve(condition);
         } catch (ValidationException e) {

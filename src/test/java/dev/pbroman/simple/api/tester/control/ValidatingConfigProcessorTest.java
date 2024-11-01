@@ -18,6 +18,9 @@ class ValidatingConfigProcessorTest {
 
     @Test
     void testValidationWarnings() throws IOException {
+        // given
+        var numExpectedWarnings = 7;
+
         // when
         var testSuiteRuntime = validatingConfigProcessor.loadConfig("classpath:warningSuite.yaml", null);
 
@@ -26,8 +29,8 @@ class ValidatingConfigProcessorTest {
         var testSuite = testSuiteRuntime.testSuite();
         var validations = testSuite.getAllValidations();
         assertNotNull(validations);
-        assertEquals(7, validations.size(), "There should be 7 validations in the test suite");
-        assertEquals(7, validations.stream().filter(v -> v.validationType() == ValidationType.WARN).count(), "All validations should be warnings");
+        assertEquals(numExpectedWarnings, validations.size(), "There should be " + numExpectedWarnings + " validations in the test suite");
+        assertEquals(numExpectedWarnings, validations.stream().filter(v -> v.validationType() == ValidationType.WARN).count(), "All validations should be warnings");
         assertTrue(validations.stream().anyMatch(v -> "POST http://example.com".equals(v.instanceName())));
         assertTrue(validations.stream().anyMatch(v -> "PUT http://example.com".equals(v.instanceName())));
         assertTrue(validations.stream().anyMatch(v -> "PATCH http://example.com".equals(v.instanceName())));
@@ -38,6 +41,9 @@ class ValidatingConfigProcessorTest {
 
     @Test
     void testValidationFails() throws IOException {
+        // given
+        var numExpectedFails = 17;
+
         // when
         var testSuiteRuntime = validatingConfigProcessor.loadConfig("classpath:failSuite.yaml", null);
 
@@ -46,8 +52,8 @@ class ValidatingConfigProcessorTest {
         var testSuite = testSuiteRuntime.testSuite();
         var validations = testSuite.getAllValidations();
         assertNotNull(validations);
-        assertEquals(4, validations.size(), "There should be 4 validations in the test suite");
-        assertEquals(4, validations.stream().filter(v -> v.validationType() == ValidationType.FAIL).count(), "All validations should be fails");
+        assertEquals(numExpectedFails, validations.size(), "There should be " + numExpectedFails + " validations in the test suite");
+        assertEquals(numExpectedFails, validations.stream().filter(v -> v.validationType() == ValidationType.FAIL).count(), "All validations should be fails");
 //        assertTrue(validations.stream().anyMatch(v -> "POST http://example.com".equals(v.instanceName())));
 //        assertTrue(validations.stream().anyMatch(v -> "PUT http://example.com".equals(v.instanceName())));
 //        assertTrue(validations.stream().anyMatch(v -> "PATCH http://example.com".equals(v.instanceName())));

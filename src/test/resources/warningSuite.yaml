@@ -27,11 +27,6 @@ requests:
       method: PATCH
       body:
         raw: ""
-  - metadata:
-      name: invalid url
-    requestDefinition:
-      url: "bollocks"
-      method: GET
 
 subSuites:
   - metadata:

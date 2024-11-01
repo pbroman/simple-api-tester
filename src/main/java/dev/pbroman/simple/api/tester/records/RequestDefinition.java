@@ -69,8 +69,9 @@ public record RequestDefinition(
                 else if ( headers.get("Content-Type").startsWith("application/x-www-form-urlencoded")) {
                     if (!body.isEmpty()) {
                         body.put(BODY_STRING, body.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).reduce((a, b) -> a + "&" + b).orElse(""));
+                    } else {
+                        validations.add(validation("Form-urlencoded body must define key-value pairs for the body", ValidationType.FAIL));
                     }
-                    validations.add(validation("Form-urlencoded body must define key-value pairs for the body", ValidationType.FAIL));
                 }
             } else {
                 validations.add(validation("No Content-Type set for request " + method + " " + url, ValidationType.WARN));
@@ -83,6 +84,9 @@ public record RequestDefinition(
                     validations.add(validation(message, ValidationType.FAIL));
                 }
             }
+        }
+        if (auth != null) {
+            validations.addAll(auth.validate());
         }
 
         return validations;

@@ -1,6 +1,5 @@
 package dev.pbroman.simple.api.tester.control;
 
-import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.testapp.CrudApplication;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,8 +11,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 class TestSuiteRunnerTest {
 
@@ -21,7 +18,7 @@ class TestSuiteRunnerTest {
     private ValidatingConfigProcessor configProcessor;
 
     @Autowired
-    private TestSuiteRunner testSuiteRunner;
+    private DefaultTestSuiteRunner testSuiteRunner;
 
     private static ConfigurableApplicationContext context;
 
