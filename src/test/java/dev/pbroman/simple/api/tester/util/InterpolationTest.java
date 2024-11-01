@@ -23,7 +23,7 @@ class InterpolationTest {
     @BeforeEach
     void init() throws JSONException {
         var constants = Map.of("foo", "bar");
-        var env = Map.of("name", "dev");
+        var env = Map.of("name", "dev", "baseUrl", "http://example.com");
         var variables = Map.of("var1", "value1", "var2", List.of());
         var responseBody = """
                 {
@@ -81,6 +81,7 @@ class InterpolationTest {
     @Test
     void multipleStringInterpolation() {
         testInterpolation("Hello ${constants.foo} and ${vars.var1}!", "Hello bar and value1!");
+        testInterpolation("${env.baseUrl}/foo/${vars.nonPresent}", "http://example.com/foo/");
     }
 
     @Test
@@ -144,6 +145,50 @@ class InterpolationTest {
         // then
         assertEquals(String.class, result.getClass());
         assertEquals("baa", result.toString());
+    }
+
+    @Test
+    void interpolateNullInput() {
+        assertNull(Interpolation.interpolate(null, runtimeData));
+    }
+
+    @Test
+    void interpolateNonStringInput() {
+        // given
+        var list = List.of();
+
+        // when
+        var result = Interpolation.interpolate(list, runtimeData);
+
+        // then
+        assertEquals(list, result);
+    }
+
+    @Test
+    void interpolateNonExistingJsonPath() {
+        // when
+        var result = Interpolation.interpolate("${response.json.non.existing}", runtimeData);
+
+        // then
+        assertNull(result);
+    }
+
+    @Test
+    void interpolateMap() {
+        // given
+        var map = Map.of("foo", "${constants.foo}", "bar", "${env.name}");
+
+        // when
+        var result = Interpolation.interpolateMap(map, runtimeData);
+
+        // then
+        assertEquals("bar", result.get("foo"));
+        assertEquals("dev", result.get("bar"));
+    }
+
+    @Test
+    void interpolateMapNullInput() {
+        assertNull(Interpolation.interpolate(null, runtimeData));
     }
 
     @Test

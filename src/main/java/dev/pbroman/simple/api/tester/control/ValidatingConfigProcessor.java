@@ -3,6 +3,7 @@ package dev.pbroman.simple.api.tester.control;
 import dev.pbroman.simple.api.tester.api.ConfigLoader;
 import dev.pbroman.simple.api.tester.api.ConfigProcessor;
 import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
+import dev.pbroman.simple.api.tester.exception.ValidationException;
 import dev.pbroman.simple.api.tester.records.Metadata;
 import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static dev.pbroman.simple.api.tester.config.ApiTesterConfig.VALIDATION_STACK;
 import static dev.pbroman.simple.api.tester.util.Constants.VALIDATION_LOGGER;
@@ -42,23 +44,22 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
      * Process the test suite configuration and environment configuration.
      *
      * @param testSuiteLocation the location of the testSuite yaml file
-     * @param envLocation the location of the env yaml file
+     * @param env a map of environment variables
      * @return a TestSuiteRuntime object with the processed test suite and runtime data
      * @throws IOException if the config files cannot be read
      */
     @Override
-    public TestSuiteRuntime loadConfig(String testSuiteLocation, String envLocation) {
+    public TestSuiteRuntime loadConfig(String testSuiteLocation, Map<String, String> env) {
 
         try {
             var testSuite = configLoader.loadTestSuite(testSuiteLocation);
-            var env = envLocation != null ? configLoader.loadEnv(envLocation) : null;
             var runtimeData = new RuntimeData(testSuite.constants(), env);
 
             var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData);
             validationTestSuiteRunner.run(testSuiteRuntime);
 
             if (!isValid(testSuite)) {
-                validationLog.error("Test suite is invalid");
+                throw new ValidationException("Test suite is invalid", ValidationType.FAIL);
             }
             return testSuiteRuntime;
         } catch (IOException e) {

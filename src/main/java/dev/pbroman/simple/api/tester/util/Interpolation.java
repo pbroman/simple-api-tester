@@ -34,13 +34,6 @@ public class Interpolation {
     private static final String arrayIndexRegex = ".+\\[(\\d+)]";
     private static final Pattern arrayIndexPattern = Pattern.compile(arrayIndexRegex);
 
-    public static Object warnNotAllowed(String input) {
-        if (input.matches(variableRegex)) {
-            log.warn("Interpolation not allowed for this value, returning the raw string: {}", input);
-        }
-        return input;
-    }
-
     public static Map<String, String> interpolateMap(Map<String, String> input, RuntimeData runtimeData) {
         if (input == null) {
             return null;
@@ -82,13 +75,18 @@ public class Interpolation {
                     if (runtimeData.vars().get(parts[1]) != null) {
                         valuesList.add(runtimeData.vars().get(parts[1]).toString());
                     } else {
-                        throw new ValidationException("The variable " + parts[1] + " has not been set", ValidationType.WARN);
+                        log.warn("The variable '{}' has not been set, replacing it with an empty string", parts[1]);
+                        valuesList.add("");
                     }
                     break;
 
                 case ENV:
                     guardVarSingleKey(parts);
-                    valuesList.add(runtimeData.env().get(parts[1]));
+                    if (runtimeData.env().get(parts[1]) != null) {
+                        valuesList.add(runtimeData.env().get(parts[1]));
+                    } else {
+                        throw new ValidationException("The env var " + parts[1] + " has not been set", ValidationType.FAIL);
+                    }
                     break;
                     
                 case RESPONSE:
@@ -175,9 +173,9 @@ public class Interpolation {
                     log.warn("Could not find the json path in the response body. Path: {}, body: {}", StringUtils.joinWith(".", (Object[]) parts), body, e);
                     return null;
                 }
-            }
-            else if (parts[i].startsWith("_")) {
-                return interpolateFunction(json, parts[i]);
+            } else {
+                log.warn("Could not find the json path in the response body. Path: {}, body: {}", StringUtils.joinWith(".", (Object[]) parts), body);
+                return null;
             }
         }
         return json;

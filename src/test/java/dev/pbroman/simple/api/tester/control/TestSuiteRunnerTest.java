@@ -1,5 +1,9 @@
 package dev.pbroman.simple.api.tester.control;
 
+import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
+import dev.pbroman.simple.api.tester.records.TestSuite;
+import dev.pbroman.simple.api.tester.records.result.AssertionResult;
+import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.testapp.CrudApplication;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,6 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class TestSuiteRunnerTest {
@@ -18,7 +29,7 @@ class TestSuiteRunnerTest {
     private ValidatingConfigProcessor configProcessor;
 
     @Autowired
-    private DefaultTestSuiteRunner testSuiteRunner;
+    private TestSuiteRunner testSuiteRunner;
 
     private static ConfigurableApplicationContext context;
 
@@ -37,20 +48,35 @@ class TestSuiteRunnerTest {
     @Test
     void run() throws IOException {
         // given
-        var testSuiteRuntime = configProcessor.loadConfig("classpath:crudApiSpec.yaml", null);
-        testSuiteRuntime.runtimeData().env().put("baseUrl", "http://localhost:8080");
+        var env = Map.of("baseUrl", "http://localhost:8080");
+        var testSuiteRuntime = configProcessor.loadConfig("classpath:crudApiSpec.yaml", env);
 
         // when
         testSuiteRunner.run(testSuiteRuntime);
 
         // then
-//        assertNotNull(testResults);
-//        assertEquals(testSuiteRuntime.testSuite().subSuites().size(), testResults.size());
-//          // check there are no failing assertions
-//        testResults.forEach(
-//                (suite, results) -> results.forEach(
-//                        result -> ((RequestResult) result).assertionResults().forEach(
-//                                assertion -> assertTrue(assertion.passed()))) );
+        assertNotNull(testSuiteRuntime.testSuite().validations());
+        var requestResults = collectRequestResults(testSuiteRuntime.testSuite(), new ArrayList<>());
+
+        assertNotNull(requestResults);
+
+        requestResults.stream().flatMap(requestResult -> requestResult.assertionResults().stream())
+                .filter( result -> !result.passed())
+                .forEach(System.out::println);
+
+        assertTrue(requestResults.stream().flatMap(requestResult -> requestResult.assertionResults().stream())
+                .allMatch(AssertionResult::passed));
+
+
+    }
+
+    private List<RequestResult> collectRequestResults(TestSuite testSuite, List<RequestResult> previousResults) {
+        previousResults.addAll(testSuite.requests().stream()
+                .flatMap(request -> request.requestResults().stream())
+                .toList()
+        );
+        testSuite.subSuites().forEach(subSuite -> collectRequestResults(subSuite, previousResults));
+        return previousResults;
     }
 
 }

@@ -40,11 +40,12 @@ public class ValidationRequestProcessor implements RequestProcessor {
 
         if (request.requestDefinition() != null) {
             try {
-                request.requestDefinition().interpolated(runtimeData);
-                new URI(request.requestDefinition().url()).toURL();
+                var requestDef = request.requestDefinition().interpolated(runtimeData);
+                new URI(requestDef.url()).toURL();
             } catch (ValidationException e) {
                 request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), e.getValidationType()));
             } catch (Exception e) {
+                e.printStackTrace();
                 request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), ValidationType.FAIL));
             }
         }
