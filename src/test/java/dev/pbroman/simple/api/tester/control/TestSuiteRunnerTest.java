@@ -55,7 +55,7 @@ class TestSuiteRunnerTest {
         testSuiteRunner.run(testSuiteRuntime);
 
         // then
-        assertNotNull(testSuiteRuntime.testSuite().validations());
+        assertNotNull(testSuiteRuntime.runtimeData().validations());
         var requestResults = collectRequestResults(testSuiteRuntime.testSuite(), new ArrayList<>());
 
         assertNotNull(requestResults);
@@ -71,10 +71,7 @@ class TestSuiteRunnerTest {
     }
 
     private List<RequestResult> collectRequestResults(TestSuite testSuite, List<RequestResult> previousResults) {
-        previousResults.addAll(testSuite.requests().stream()
-                .flatMap(request -> request.requestResults().stream())
-                .toList()
-        );
+        // TODO get from runtimeData
         testSuite.subSuites().forEach(subSuite -> collectRequestResults(subSuite, previousResults));
         return previousResults;
     }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultTestResultProcessor implements TestResultProcessor {
 
-    private MessageRenderer messageRenderer;
+    private final MessageRenderer messageRenderer;
 
     public DefaultTestResultProcessor(MessageRenderer messageRenderer) {
         this.messageRenderer = messageRenderer;
@@ -17,6 +17,8 @@ public class DefaultTestResultProcessor implements TestResultProcessor {
 
     @Override
     public void process(RequestResult requestResult, RuntimeData runtimeData) {
+
+        runtimeData.requestResults().add(requestResult);
 
         System.out.println(messageRenderer.renderTestResultMessage(requestResult));
         requestResult.assertionResults().forEach(assertion -> {

@@ -1,7 +1,6 @@
 package dev.pbroman.simple.api.tester.records;
 
 import dev.pbroman.simple.api.tester.api.ConfigRecord;
-import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;
 
@@ -13,22 +12,12 @@ public record Request(
         Condition skipCondition,
         RequestDefinition requestDefinition,
         ResponseHandling responseHandling,
-        FlowControl flowControl,
-        List<Validation> validations,
-        List<RequestResult> requestResults
+        FlowControl flowControl
     ) implements ConfigRecord {
-
-    public Request {
-        if (validations == null) {
-            validations = new ArrayList<>();
-        }
-        if (requestResults == null) {
-            requestResults = new ArrayList<>();
-        }
-    }
 
     @Override
     public List<Validation> validate() {
+        var validations = new ArrayList<Validation>();
         if (metadata == null) {
             validations.add(validation("Request metadata should not be null", ValidationType.WARN));
         } else {
@@ -54,13 +43,13 @@ public record Request(
         return validations;
     }
 
-    public Validation validation(String message, ValidationType validationType) {
+    private Validation validation(String message, ValidationType validationType) {
         var instanceName = metadata != null ? metadata.name() : null;
         return new Validation(this.getClass().getSimpleName(), instanceName, message, validationType);
     }
 
     public Request withRequestDefinition(RequestDefinition requestDefinition) {
-        return new Request(metadata, skipCondition, requestDefinition, responseHandling, flowControl, validations, requestResults);
+        return new Request(metadata, skipCondition, requestDefinition, responseHandling, flowControl);
     }
 
 }

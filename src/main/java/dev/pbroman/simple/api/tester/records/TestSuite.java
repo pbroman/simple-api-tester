@@ -18,8 +18,7 @@ public record TestSuite(
         Map<String, String> constants,
         String defaultTimeout,
         List<Request> requests,
-        List<TestSuite> subSuites,
-        List<Validation> validations
+        List<TestSuite> subSuites
     ) implements ConfigRecord {
 
     public TestSuite {
@@ -28,9 +27,6 @@ public record TestSuite(
         }
         if (defaultTimeout == null) {
             defaultTimeout = DEFAULT_TIMEOUT_MS;
-        }
-        if (validations == null) {
-            validations = new ArrayList<>();
         }
         if (requests == null) {
             requests = List.of();
@@ -42,6 +38,8 @@ public record TestSuite(
 
     @Override
     public List<Validation> validate() {
+        var validations = new ArrayList<Validation>();
+
         if (metadata == null) {
             validations.add(validation("The test suite metadata cannot be null", ValidationType.FAIL));
         } else {
@@ -66,18 +64,10 @@ public record TestSuite(
         return new Validation(this.getClass().getSimpleName(), instanceName, message, validationType);
     }
 
-    public List<Validation> getAllValidations() {
-        var allValidations = new ArrayList<>(validations);
-        requests.forEach(request -> allValidations.addAll(request.validations()));
-        subSuites.forEach(subSuite -> allValidations.addAll(subSuite.getAllValidations()));
-        return allValidations;
-    }
-
-
     public TestSuite withAuth(Auth auth) {
-        return new TestSuite(metadata, auth, skipCondition, constants, defaultTimeout, requests, subSuites, validations);
+        return new TestSuite(metadata, auth, skipCondition, constants, defaultTimeout, requests, subSuites);
     }
     public TestSuite withTimeout(String timeout) {
-        return new TestSuite(metadata, auth,  skipCondition,constants, timeout, requests, subSuites, validations);
+        return new TestSuite(metadata, auth,  skipCondition,constants, timeout, requests, subSuites);
     }
 }

@@ -19,15 +19,14 @@ class ValidatingConfigProcessorTest {
     @Test
     void testValidationWarnings() throws IOException {
         // given
-        var numExpectedWarnings = 7;
+        var numExpectedWarnings = 6;
 
         // when
         var testSuiteRuntime = validatingConfigProcessor.loadConfig("classpath:warningSuite.yaml", null);
 
         // then
         assertNotNull(testSuiteRuntime);
-        var testSuite = testSuiteRuntime.testSuite();
-        var validations = testSuite.getAllValidations();
+        var validations = testSuiteRuntime.runtimeData().validations();
         assertNotNull(validations);
         assertEquals(numExpectedWarnings, validations.size(), "There should be " + numExpectedWarnings + " validations in the test suite");
         assertEquals(numExpectedWarnings, validations.stream().filter(v -> v.validationType() == ValidationType.WARN).count(), "All validations should be warnings");
@@ -49,8 +48,7 @@ class ValidatingConfigProcessorTest {
 
         // then
         assertNotNull(testSuiteRuntime);
-        var testSuite = testSuiteRuntime.testSuite();
-        var validations = testSuite.getAllValidations();
+        var validations = testSuiteRuntime.runtimeData().validations();
         assertNotNull(validations);
         assertEquals(numExpectedFails, validations.size(), "There should be " + numExpectedFails + " validations in the test suite");
         assertEquals(numExpectedFails, validations.stream().filter(v -> v.validationType() == ValidationType.FAIL).count(), "All validations should be fails");

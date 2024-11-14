@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
@@ -44,7 +43,6 @@ public class DefaultRequestProcessor implements RequestProcessor {
         }
 
         var requestResult = processInternal(request, runtimeData, 1);
-        request.requestResults().add(requestResult);
         testResultProcessor.process(requestResult, runtimeData);
     }
 
@@ -67,7 +65,8 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
         runtimeData = runtimeData.withHttpResponseVars(response);
         var assertionResults = responseHandler.handleResponse(request.responseHandling(), runtimeData);
-        var requestResult = new RequestResult(response, numAttempt, roundTripTime, assertionResults);
+        var path = runtimeData.currentPath() + "/" + runtimeData.currentRequestNo() + "/" + (request.metadata().name() != null ? request.metadata().name() : "Unnamed");
+        var requestResult = new RequestResult(request, path, response, numAttempt, roundTripTime, assertionResults);
 
         /*
          * Flow control, using data from the response

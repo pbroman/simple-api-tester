@@ -35,7 +35,7 @@ public class ValidationRequestProcessor implements RequestProcessor {
 
         if (request.skipCondition() != null) {
             var interpolatedCondition = validateConditionInterpolation(request, request.skipCondition(), runtimeData);
-            validateConditionResolving(request, interpolatedCondition);
+            validateConditionResolving(runtimeData, interpolatedCondition);
         }
 
         if (request.requestDefinition() != null) {
@@ -43,25 +43,24 @@ public class ValidationRequestProcessor implements RequestProcessor {
                 var requestDef = request.requestDefinition().interpolated(runtimeData);
                 new URI(requestDef.url()).toURL();
             } catch (ValidationException e) {
-                request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), e.getValidationType()));
+                runtimeData.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), e.getValidationType()));
             } catch (Exception e) {
-                e.printStackTrace();
-                request.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), ValidationType.FAIL));
+                runtimeData.validations().add(new Validation("RequestDefinitionInterpolation", request.requestDefinition().url(), e.getMessage(), ValidationType.FAIL));
             }
         }
 
         if (request.responseHandling() != null) {
             request.responseHandling().assertions().forEach(condition -> {
                 var interpolatedCondition = validateConditionInterpolation(request, condition, runtimeData);
-                validateConditionResolving(request, interpolatedCondition);
+                validateConditionResolving(runtimeData, interpolatedCondition);
             });
             request.responseHandling().setVars().forEach((key, value) -> {
                 try {
                     runtimeData.vars().put(key, Interpolation.interpolate(value, runtimeData));
                 } catch (ValidationException e) {
-                    request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), e.getValidationType()));
+                    runtimeData.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), e.getValidationType()));
                 } catch (Exception e) {
-                    request.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), ValidationType.FAIL));
+                    runtimeData.validations().add(new Validation(SET_VARS_COMPONENT, value, e.getMessage(), ValidationType.FAIL));
                 }
             });
         }
@@ -71,12 +70,12 @@ public class ValidationRequestProcessor implements RequestProcessor {
             try {
                 var flowControl = request.flowControl().interpolated(runtimeData);
                 if (flowControl.repeatUntil() != null) {
-                    validateConditionResolving(request, flowControl.repeatUntil().condition());
+                    validateConditionResolving(runtimeData, flowControl.repeatUntil().condition());
                 }
             } catch (ValidationException e) {
-                request.validations().add(new Validation(FLOW_CONTROL_INTERPOLATION_COMPONENT, "flow control", e.getMessage(), e.getValidationType()));
+                runtimeData.validations().add(new Validation(FLOW_CONTROL_INTERPOLATION_COMPONENT, "flow control", e.getMessage(), e.getValidationType()));
             } catch (Exception e) {
-                request.validations().add(new Validation(FLOW_CONTROL_INTERPOLATION_COMPONENT, "flow control", e.getMessage(), ValidationType.FAIL));
+                runtimeData.validations().add(new Validation(FLOW_CONTROL_INTERPOLATION_COMPONENT, "flow control", e.getMessage(), ValidationType.FAIL));
             }
         }
     }
@@ -85,14 +84,14 @@ public class ValidationRequestProcessor implements RequestProcessor {
         try {
             return condition.interpolated(runtimeData);
         } catch (ValidationException e) {
-            request.validations().add(new Validation(CONDITION_INTERPOLATION_COMPONENT, condition.getInstanceName(), e.getMessage(), e.getValidationType()));
+            runtimeData.validations().add(new Validation(CONDITION_INTERPOLATION_COMPONENT, condition.getInstanceName(), e.getMessage(), e.getValidationType()));
         } catch (Exception e) {
-            request.validations().add(new Validation(CONDITION_INTERPOLATION_COMPONENT, condition.getInstanceName(), e.getMessage(), ValidationType.FAIL));
+            runtimeData.validations().add(new Validation(CONDITION_INTERPOLATION_COMPONENT, condition.getInstanceName(), e.getMessage(), ValidationType.FAIL));
         }
         return null;
     }
 
-    private void validateConditionResolving(Request request, Condition condition) {
+    private void validateConditionResolving(RuntimeData runtimeData, Condition condition) {
         if (condition == null) {
             return;
         }
@@ -103,9 +102,9 @@ public class ValidationRequestProcessor implements RequestProcessor {
         try {
             ConditionResolver.resolve(condition);
         } catch (ValidationException e) {
-            request.validations().add(new Validation(CONDITION_RESOLVER_COMPONENT, condition.getInstanceName(), e.getMessage(), e.getValidationType()));
+            runtimeData.validations().add(new Validation(CONDITION_RESOLVER_COMPONENT, condition.getInstanceName(), e.getMessage(), e.getValidationType()));
         } catch (Exception e) {
-            request.validations().add(new Validation(CONDITION_RESOLVER_COMPONENT, condition.getInstanceName(), e.getMessage(), ValidationType.FAIL));
+            runtimeData.validations().add(new Validation(CONDITION_RESOLVER_COMPONENT, condition.getInstanceName(), e.getMessage(), ValidationType.FAIL));
         }
     }
 }

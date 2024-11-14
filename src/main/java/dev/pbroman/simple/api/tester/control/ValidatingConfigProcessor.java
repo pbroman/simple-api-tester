@@ -8,7 +8,6 @@ import dev.pbroman.simple.api.tester.records.Metadata;
 import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
-import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +57,6 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
             var testSuiteRuntime = new TestSuiteRuntime(testSuite, runtimeData);
             validationTestSuiteRunner.run(testSuiteRuntime);
 
-            if (!isValid(testSuite)) {
-                throw new ValidationException("Test suite is invalid", ValidationType.FAIL);
-            }
             return testSuiteRuntime;
         } catch (IOException e) {
             validationLog.error(e.getMessage(), e);
@@ -68,30 +64,18 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
         return null;
     }
 
-    private boolean isValid(TestSuite testSuite) {
-        var validations = new ArrayList<Validation>();
-        collectAndLogValidations(testSuite, validations);
-        testSuite.subSuites().forEach(subSuite -> {
-            collectAndLogValidations(subSuite, validations);
-        });
+    private boolean isValid(RuntimeData runtimeData) {
 
-        var fails = validations.stream().filter(validation -> validation.validationType().equals(ValidationType.FAIL)).toList();
-        var warns = validations.stream().filter(validation -> validation.validationType().equals(ValidationType.WARN)).toList();
+        // TODO log validations?
+
+        var fails = runtimeData.validations().stream().filter(validation -> validation.validationType().equals(ValidationType.FAIL)).toList();
+        var warns = runtimeData.validations().stream().filter(validation -> validation.validationType().equals(ValidationType.WARN)).toList();
 
         validationLog.info("Validations: {} WARN, {} FAIL", warns.size(), fails.size());
 
         return fails.isEmpty();
     }
 
-    private void collectAndLogValidations(TestSuite testSuite, List<Validation> validations) {
-        testSuite.validations().forEach(validation -> logValidation(testSuite.metadata(), validation));
-        validations.addAll(testSuite.validations());
-        testSuite.requests().forEach(request -> {
-            request.validations().forEach(validation -> logValidation(request.metadata(), validation));
-            validations.addAll(request.validations());
-        });
-
-    }
 
     private void logValidation(Metadata metadata, Validation validation) {
         var prefix = metadata != null ? metadata.name() + ": " : "Anonymous: ";

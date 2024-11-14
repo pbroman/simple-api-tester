@@ -18,19 +18,21 @@ public class DefaultTestSuiteRunner implements TestSuiteRunner {
     public void run(TestSuiteRuntime testSuiteRuntime) {
 
         var testSuite = testSuiteRuntime.testSuite();
-        var runtimeData = testSuiteRuntime.runtimeData();
+        var testSuiteName = testSuite.metadata() != null && testSuite.metadata().name() != null ? testSuite.metadata().name() : "UnnamedSuite";
+        var runtimeData = testSuiteRuntime.runtimeData()
+                .withCurrentPath(testSuiteRuntime.runtimeData().currentPath() + "/" + testSuiteName);
 
         if (testSuite.subSuites() != null) {
             testSuite.subSuites().forEach(subSuite -> {
-                subSuite.validate();
+                runtimeData.validations().addAll(subSuite.validate());
                 run(new TestSuiteRuntime(collectionInheritance(subSuite, testSuite), runtimeData));
             });
         }
 
         if (testSuite.requests() != null) {
             testSuite.requests().forEach(request -> {
-                request.validate();
-                requestProcessor.processRequest(requestInheritance(request, testSuite), runtimeData);
+                runtimeData.validations().addAll(request.validate());
+                requestProcessor.processRequest(requestInheritance(request, testSuite), runtimeData.incrementRequestNo());
             });
         }
 
