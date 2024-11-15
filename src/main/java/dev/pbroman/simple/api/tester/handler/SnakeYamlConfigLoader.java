@@ -7,7 +7,6 @@ import dev.pbroman.simple.api.tester.records.TestSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.util.Map;
  *
  * See <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/98">FasterXML issue 98</a>
  */
-@Component
 public class SnakeYamlConfigLoader implements ConfigLoader {
 
     private static final Logger log = LoggerFactory.getLogger(SnakeYamlConfigLoader.class);

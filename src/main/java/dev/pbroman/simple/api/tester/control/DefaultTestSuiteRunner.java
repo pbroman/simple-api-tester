@@ -2,8 +2,10 @@ package dev.pbroman.simple.api.tester.control;
 
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
+import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 
+import static dev.pbroman.simple.api.tester.util.Constants.PATH_DELIMITER;
 import static dev.pbroman.simple.api.tester.util.Inheritance.collectionInheritance;
 import static dev.pbroman.simple.api.tester.util.Inheritance.requestInheritance;
 
@@ -16,16 +18,19 @@ public class DefaultTestSuiteRunner implements TestSuiteRunner {
     }
 
     public void run(TestSuiteRuntime testSuiteRuntime) {
+        runInternal(testSuiteRuntime, extendPath(testSuiteRuntime.testSuite(), null));
+    }
+
+    private void runInternal(TestSuiteRuntime testSuiteRuntime, String path) {
 
         var testSuite = testSuiteRuntime.testSuite();
-        var testSuiteName = testSuite.metadata() != null && testSuite.metadata().name() != null ? testSuite.metadata().name() : "UnnamedSuite";
-        var runtimeData = testSuiteRuntime.runtimeData()
-                .withCurrentPath(testSuiteRuntime.runtimeData().currentPath() + "/" + testSuiteName);
+        var runtimeData = testSuiteRuntime.runtimeData();
 
         if (testSuite.subSuites() != null) {
             testSuite.subSuites().forEach(subSuite -> {
                 runtimeData.validations().addAll(subSuite.validate());
-                run(new TestSuiteRuntime(collectionInheritance(subSuite, testSuite), runtimeData));
+                var currentPath = extendPath(subSuite, path);
+                runInternal(new TestSuiteRuntime(collectionInheritance(subSuite, testSuite), runtimeData.withCurrentPath(currentPath)), currentPath);
             });
         }
 
@@ -36,5 +41,10 @@ public class DefaultTestSuiteRunner implements TestSuiteRunner {
             });
         }
 
+    }
+
+    private String extendPath(TestSuite testSuite, String path) {
+        var testSuiteName = testSuite.metadata() != null && testSuite.metadata().name() != null ? testSuite.metadata().name() : "UnnamedSuite";
+        return path == null ? testSuiteName : String.join(PATH_DELIMITER, path, testSuiteName);
     }
 }

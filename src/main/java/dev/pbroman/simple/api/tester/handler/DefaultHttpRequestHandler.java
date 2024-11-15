@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestClient;
 
@@ -19,9 +18,7 @@ import java.util.Map;
 
 import static dev.pbroman.simple.api.tester.records.Auth.AUTH_TYPE_NONE;
 import static dev.pbroman.simple.api.tester.util.Constants.BODY_STRING;
-import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 
-@Service
 public class DefaultHttpRequestHandler implements HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpRequestHandler.class);

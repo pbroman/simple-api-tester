@@ -9,12 +9,28 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>dev.pbroman</groupId>
-	<artifactId>simple-api-tester</artifactId>
+	<artifactId>simple-api-tester-spring-boot-starter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>simple-api-tester</name>
+	<description/>
+	<url/>
+	<developers>
+		<developer/>
+	</developers>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+	<scm>
+		<url>https://github.com/pbroman/simple-api-tester</url>
+	</scm>
+
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -53,10 +69,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -1,0 +1,2 @@
+dev.pbroman.simple.api.tester.config.ApiTesterAutoConfiguration
+org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration

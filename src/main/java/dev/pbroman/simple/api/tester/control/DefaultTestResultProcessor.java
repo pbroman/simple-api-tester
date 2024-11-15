@@ -4,9 +4,7 @@ import dev.pbroman.simple.api.tester.api.MessageRenderer;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
 import dev.pbroman.simple.api.tester.records.result.RequestResult;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DefaultTestResultProcessor implements TestResultProcessor {
 
     private final MessageRenderer messageRenderer;
@@ -22,11 +20,8 @@ public class DefaultTestResultProcessor implements TestResultProcessor {
 
         System.out.println(messageRenderer.renderTestResultMessage(requestResult));
         requestResult.assertionResults().forEach(assertion -> {
-            if (assertion.passed()) {
-                System.out.println("  " + messageRenderer.renderAssertionResultMessage(assertion));
-            } else {
-                System.err.println("  " + messageRenderer.renderAssertionResultMessage(assertion));
-            }
+            System.out.println("  " + messageRenderer.renderAssertionResultMessage(assertion));
         });
+        System.out.println();
     }
 }

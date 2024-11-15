@@ -23,7 +23,17 @@ public class Constants {
 
     public static final Integer DEFAULT_MAX_ATTEMPTS = 3;
 
+    public static final String PATH_DELIMITER = " |o| ";
 
-
+    // COLORS
+    public static final String COLOR_RESET = "\033[0m";
+    public static final String COLOR_RED = "\033[0;31m";
+    public static final String COLOR_GREEN = "\033[0;32m";
+    public static final String COLOR_YELLOW = "\033[0;33m";
+    public static final String COLOR_BLUE = "\033[0;34m";
+    public static final String COLOR_PURPLE = "\033[0;35m";
+    public static final String COLOR_CYAN = "\033[0;36m";
+    public static final String COLOR_WHITE = "\033[0;37m";
+    public static final String COLOR_BLACK_BOLD = "\033[1;30m";
 
 }

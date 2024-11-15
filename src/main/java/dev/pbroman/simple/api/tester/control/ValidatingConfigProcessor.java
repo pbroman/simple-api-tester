@@ -3,7 +3,6 @@ package dev.pbroman.simple.api.tester.control;
 import dev.pbroman.simple.api.tester.api.ConfigLoader;
 import dev.pbroman.simple.api.tester.api.ConfigProcessor;
 import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
-import dev.pbroman.simple.api.tester.exception.ValidationException;
 import dev.pbroman.simple.api.tester.records.Metadata;
 import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;
@@ -11,22 +10,16 @@ import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import dev.pbroman.simple.api.tester.records.runtime.TestSuiteRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import static dev.pbroman.simple.api.tester.config.ApiTesterConfig.VALIDATION_STACK;
 import static dev.pbroman.simple.api.tester.util.Constants.VALIDATION_LOGGER;
 
 /**
  * The @ConfigProcessor runs through the entire test suite, setting inherited values where necessary,
  * validating the configuration, and resolves constants and env values set in the configuration.
  */
-@Component
 public class ValidatingConfigProcessor implements ConfigProcessor {
 
     private static final Logger validationLog = LoggerFactory.getLogger(VALIDATION_LOGGER);
@@ -34,7 +27,7 @@ public class ValidatingConfigProcessor implements ConfigProcessor {
     private final ConfigLoader configLoader;
     private final TestSuiteRunner validationTestSuiteRunner;
 
-    public ValidatingConfigProcessor(ConfigLoader configLoader, @Qualifier(VALIDATION_STACK) TestSuiteRunner testSuiteRunner) {
+    public ValidatingConfigProcessor(ConfigLoader configLoader, TestSuiteRunner testSuiteRunner) {
         this.configLoader = configLoader;
         this.validationTestSuiteRunner = testSuiteRunner;
     }

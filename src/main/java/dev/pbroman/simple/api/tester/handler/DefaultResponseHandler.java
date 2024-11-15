@@ -6,15 +6,11 @@ import dev.pbroman.simple.api.tester.util.ConditionResolver;
 import dev.pbroman.simple.api.tester.util.Interpolation;
 import dev.pbroman.simple.api.tester.records.ResponseHandling;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Component
 public class DefaultResponseHandler implements ResponseHandler {
 
     @Override

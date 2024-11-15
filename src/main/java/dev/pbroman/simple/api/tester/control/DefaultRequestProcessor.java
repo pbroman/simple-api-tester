@@ -16,8 +16,13 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import static dev.pbroman.simple.api.tester.util.Constants.PATH_DELIMITER;
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
 
 public class DefaultRequestProcessor implements RequestProcessor {
@@ -37,19 +42,23 @@ public class DefaultRequestProcessor implements RequestProcessor {
     @Override
     public void processRequest(Request request, RuntimeData runtimeData) {
 
+        var path = String.join(PATH_DELIMITER, runtimeData.currentPath(), request.metadata().name());
+        RequestResult requestResult;
+
         if (request.skipCondition() != null && ConditionResolver.resolve(request.skipCondition().interpolated(runtimeData))) {
-            protocol.info("Skipping request: '{}' due to skipCondition: {}", request.metadata().name(), request.skipCondition().message());
-            return;
+//            protocol.info("Skipping request: '{}' due to skipCondition: {}", request.metadata().name(), request.skipCondition().message());
+            requestResult = new RequestResult(request.requestDefinition().interpolated(runtimeData), path, runtimeData.currentRequestNo(), null, -1, 0, null);
+        } else {
+            requestResult = processInternal(request, runtimeData, path, 1);
         }
 
-        var requestResult = processInternal(request, runtimeData, 1);
         testResultProcessor.process(requestResult, runtimeData);
     }
 
-    private RequestResult processInternal(Request request, RuntimeData runtimeData, int numAttempt) {
+    private RequestResult processInternal(Request request, RuntimeData runtimeData, String path, int numAttempt) {
 
         var requestDefinition = request.requestDefinition().interpolated(runtimeData);
-        protocol.info("{}: {} {} ({}), body: {}", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description(), requestDefinition.body());
+//        protocol.info("{}: {} {} ({}), body: {}", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description(), requestDefinition.body());
         try {
             new URI(requestDefinition.url());
         } catch (URISyntaxException e) {
@@ -60,13 +69,12 @@ public class DefaultRequestProcessor implements RequestProcessor {
         var response = httpRequestHandler.performRequest(requestDefinition);
         long roundTripTime = System.currentTimeMillis() - startTime;
 
-        protocol.info("  Response status: {}", response.getStatusCode());
-        protocol.info("  Response body: {}", response.getBody());
+//        protocol.info("  Response status: {}", response.getStatusCode());
+//        protocol.info("  Response body: {}", response.getBody());
 
         runtimeData = runtimeData.withHttpResponseVars(response);
         var assertionResults = responseHandler.handleResponse(request.responseHandling(), runtimeData);
-        var path = runtimeData.currentPath() + "/" + runtimeData.currentRequestNo() + "/" + (request.metadata().name() != null ? request.metadata().name() : "Unnamed");
-        var requestResult = new RequestResult(request, path, response, numAttempt, roundTripTime, assertionResults);
+        var requestResult = new RequestResult(requestDefinition, path, runtimeData.currentRequestNo(), response, numAttempt, roundTripTime, assertionResults);
 
         /*
          * Flow control, using data from the response
@@ -86,7 +94,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
                 while (!ConditionResolver.resolve(repeatUntil.condition()) && numAttempt < repeatUntil.maxAttempts()) {
                     Awaitility.await().atMost(flowControl.repeatUntil().waitBetweenAttempts(), TimeUnit.MILLISECONDS)
                             .until(() -> true);
-                    processInternal(request, runtimeData, numAttempt + 1);
+                    processInternal(request, runtimeData, path, numAttempt + 1);
                 }
             }
         }

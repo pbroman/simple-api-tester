@@ -1,6 +1,8 @@
 package dev.pbroman.simple.api.tester.control;
 
+import dev.pbroman.simple.api.tester.api.ConfigProcessor;
 import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
+import dev.pbroman.simple.api.tester.config.ApiTesterAutoConfiguration;
 import dev.pbroman.simple.api.tester.records.TestSuite;
 import dev.pbroman.simple.api.tester.records.result.AssertionResult;
 import dev.pbroman.simple.api.tester.records.result.RequestResult;
@@ -10,23 +12,25 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@ContextConfiguration(classes = {ApiTesterAutoConfiguration.class, JacksonAutoConfiguration.class})
 class TestSuiteRunnerTest {
 
     @Autowired
-    private ValidatingConfigProcessor configProcessor;
+    private ConfigProcessor configProcessor;
 
     @Autowired
     private TestSuiteRunner testSuiteRunner;
