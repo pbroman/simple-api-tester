@@ -25,6 +25,11 @@ public class Constants {
 
     public static final String PATH_DELIMITER = " |o| ";
 
+    public static final String AUTH_TYPE_BASIC = "basic";
+    public static final String AUTH_TYPE_BEARER = "bearer";
+    public static final String AUTH_TYPE_APIKEY = "apikey";
+    public static final String AUTH_TYPE_NONE = "none";
+
     // COLORS
     public static final String COLOR_RESET = "\033[0m";
     public static final String COLOR_RED = "\033[0;31m";

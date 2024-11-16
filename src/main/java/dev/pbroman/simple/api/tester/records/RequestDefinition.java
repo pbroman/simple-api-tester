@@ -30,7 +30,7 @@ public record RequestDefinition(
 
     public RequestDefinition {
         if (auth == null) {
-            auth = new Auth(Auth.AUTH_TYPE_NONE, null, null, null);
+            auth = new Auth(AUTH_TYPE_NONE, null, null, null);
         }
     }
 

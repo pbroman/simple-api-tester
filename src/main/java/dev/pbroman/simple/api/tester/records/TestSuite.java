@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_NONE;
 import static dev.pbroman.simple.api.tester.util.Constants.DEFAULT_TIMEOUT_MS;
 
 
@@ -23,7 +24,7 @@ public record TestSuite(
 
     public TestSuite {
         if (auth == null) {
-            auth = new Auth(Auth.AUTH_TYPE_NONE, null, null, null);
+            auth = new Auth(AUTH_TYPE_NONE, null, null, null);
         }
         if (defaultTimeout == null) {
             defaultTimeout = DEFAULT_TIMEOUT_MS;

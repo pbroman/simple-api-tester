@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.Map;
 
-import static dev.pbroman.simple.api.tester.records.Auth.AUTH_TYPE_NONE;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_NONE;
 import static dev.pbroman.simple.api.tester.util.Constants.BODY_STRING;
 
 public class DefaultHttpRequestHandler implements HttpRequestHandler {

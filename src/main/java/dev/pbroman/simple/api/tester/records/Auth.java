@@ -9,12 +9,13 @@ import dev.pbroman.simple.api.tester.util.Interpolation;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_APIKEY;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_BASIC;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_BEARER;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_NONE;
+
 public record Auth(String type, String username, String password, String token) implements ConfigRecord {
 
-    public static final String AUTH_TYPE_BASIC = "basic";
-    public static final String AUTH_TYPE_BEARER = "bearer";
-    public static final String AUTH_TYPE_APIKEY = "apikey";
-    public static final String AUTH_TYPE_NONE = "none";
     public static final List<String> AUTH_TYPES = List.of(AUTH_TYPE_NONE, AUTH_TYPE_BASIC, AUTH_TYPE_BEARER, AUTH_TYPE_APIKEY);
 
     @Override
@@ -25,7 +26,8 @@ public record Auth(String type, String username, String password, String token) 
         } else if (!AUTH_TYPES.contains(type)) {
             validations.add(validation("Auth type must be one of 'none', 'basic', 'bearer', or 'apikey', got: '" + type + "'", ValidationType.FAIL));
         } else {
-            switch (type) {
+            var authType = type.trim().toLowerCase();
+            switch (authType) {
                 case AUTH_TYPE_BASIC -> {
                     if (username == null) {
                         validations.add(validation("Username cannot be null for basic auth", ValidationType.FAIL));

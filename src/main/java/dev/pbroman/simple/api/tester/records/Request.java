@@ -6,14 +6,23 @@ import dev.pbroman.simple.api.tester.records.result.ValidationType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public record Request(
         Metadata metadata,
         Condition skipCondition,
         RequestDefinition requestDefinition,
         ResponseHandling responseHandling,
-        FlowControl flowControl
+        FlowControl flowControl,
+        String id
     ) implements ConfigRecord {
+
+    public Request {
+        if (id == null) {
+            // This is for a future GUI to be able to identify the request
+            id = UUID.randomUUID().toString();
+        }
+    }
 
     @Override
     public List<Validation> validate() {
@@ -49,7 +58,7 @@ public record Request(
     }
 
     public Request withRequestDefinition(RequestDefinition requestDefinition) {
-        return new Request(metadata, skipCondition, requestDefinition, responseHandling, flowControl);
+        return new Request(metadata, skipCondition, requestDefinition, responseHandling, flowControl, id);
     }
 
 }

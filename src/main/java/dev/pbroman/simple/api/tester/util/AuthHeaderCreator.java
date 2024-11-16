@@ -4,34 +4,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import dev.pbroman.simple.api.tester.records.Auth;
 
-import static dev.pbroman.simple.api.tester.records.Auth.AUTH_TYPE_NONE;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_APIKEY;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_BASIC;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_BEARER;
+import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_NONE;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class AuthHeaderCreator {
 
-    private static final String BASIC = "Basic ";
-    private static final String BEARER = "Bearer ";
-    private static final String API_KEY = "Apikey ";
+    private static final String BASIC_PREFIX = "Basic ";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String API_KEY_PREFIX = "Apikey ";
 
     public static Map.Entry<String, String> createAuthHeader(Auth auth) {
-        return switch (auth.type()) {
-            case BASIC -> createBasicAuthHeader(auth.username(), auth.password());
-            case BEARER -> createBearerAuthHeader(auth.token());
-            case API_KEY -> createApiKeyAuthHeader(auth.token());
+        var authType = auth.type().trim().toLowerCase();
+        return switch (authType) {
+            case AUTH_TYPE_BASIC -> createBasicAuthHeader(auth.username(), auth.password());
+            case AUTH_TYPE_BEARER -> createBearerAuthHeader(auth.token());
+            case AUTH_TYPE_APIKEY -> createApiKeyAuthHeader(auth.token());
             case AUTH_TYPE_NONE -> null;
             default -> throw new IllegalArgumentException("Unknown auth type: " + auth.type());
         };
     }
 
     private static Map.Entry<String, String> createBasicAuthHeader(String username, String password) {
-        return Map.entry(AUTHORIZATION, BASIC + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
+        return Map.entry(AUTHORIZATION, BASIC_PREFIX + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
     }
 
     private static Map.Entry<String, String> createBearerAuthHeader(String token) {
-        return Map.entry(AUTHORIZATION, BEARER + token);
+        return Map.entry(AUTHORIZATION, BEARER_PREFIX + token);
     }
 
     private static Map.Entry<String, String> createApiKeyAuthHeader(String apiKey) {
-        return Map.entry(AUTHORIZATION, API_KEY + apiKey);
+        return Map.entry(AUTHORIZATION, API_KEY_PREFIX + apiKey);
     }
 }

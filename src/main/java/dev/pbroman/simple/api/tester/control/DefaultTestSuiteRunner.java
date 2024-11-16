@@ -24,7 +24,7 @@ public class DefaultTestSuiteRunner implements TestSuiteRunner {
     private void runInternal(TestSuiteRuntime testSuiteRuntime, String path) {
 
         var testSuite = testSuiteRuntime.testSuite();
-        var runtimeData = testSuiteRuntime.runtimeData();
+        var runtimeData = testSuiteRuntime.runtimeData().withCurrentPath(path);
 
         if (testSuite.subSuites() != null) {
             testSuite.subSuites().forEach(subSuite -> {
