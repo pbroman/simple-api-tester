@@ -16,11 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static dev.pbroman.simple.api.tester.util.Constants.PATH_DELIMITER;
 import static dev.pbroman.simple.api.tester.util.Constants.PROTOCOL_LOGGER;
@@ -60,7 +58,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
         var requestDefinition = request.requestDefinition().interpolated(runtimeData);
 //        protocol.info("{}: {} {} ({}), body: {}", request.metadata().name(), requestDefinition.method(), requestDefinition.url(), request.metadata().description(), requestDefinition.body());
         try {
-            new URI(requestDefinition.url());
+            new URI(URLEncoder.encode(requestDefinition.url(), StandardCharsets.UTF_8));
         } catch (URISyntaxException e) {
             throw new ValidationException("Invalid URL: " + requestDefinition.url(), ValidationType.FAIL, e);
         }

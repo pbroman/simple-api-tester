@@ -23,9 +23,6 @@ public record TestSuite(
     ) implements ConfigRecord {
 
     public TestSuite {
-        if (auth == null) {
-            auth = new Auth(AUTH_TYPE_NONE, null, null, null);
-        }
         if (defaultTimeout == null) {
             defaultTimeout = DEFAULT_TIMEOUT_MS;
         }

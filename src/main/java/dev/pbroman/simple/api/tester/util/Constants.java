@@ -19,7 +19,7 @@ public class Constants {
     public static final String JSON = "json";
 
     public static final String DEFAULT_TIMEOUT_MS = "30000";
-    public static final Auth DEFAULT_AUTH = new Auth("none", null, null, null);
+    public static final Auth AUTH_NONE = new Auth("none", null, null, null);
 
     public static final Integer DEFAULT_MAX_ATTEMPTS = 3;
 

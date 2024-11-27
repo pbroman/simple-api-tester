@@ -28,12 +28,6 @@ public record RequestDefinition(
 
     private static final Logger validationLog = LoggerFactory.getLogger(VALIDATION_LOGGER);
 
-    public RequestDefinition {
-        if (auth == null) {
-            auth = new Auth(AUTH_TYPE_NONE, null, null, null);
-        }
-    }
-
     @Override
     public List<Validation> validate() {
         var validations = new ArrayList<Validation>();
