@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static dev.pbroman.simple.api.tester.util.Constants.AUTH_TYPE_NONE;
 import static dev.pbroman.simple.api.tester.util.Constants.DEFAULT_TIMEOUT_MS;
 
 

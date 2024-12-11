@@ -7,9 +7,11 @@ import dev.pbroman.simple.api.tester.api.HttpRequestHandler;
 import dev.pbroman.simple.api.tester.api.MessageRenderer;
 import dev.pbroman.simple.api.tester.api.RequestProcessor;
 import dev.pbroman.simple.api.tester.api.ResponseHandler;
+import dev.pbroman.simple.api.tester.api.SingleRequestRunner;
 import dev.pbroman.simple.api.tester.api.TestResultProcessor;
 import dev.pbroman.simple.api.tester.api.TestSuiteRunner;
 import dev.pbroman.simple.api.tester.control.DefaultRequestProcessor;
+import dev.pbroman.simple.api.tester.control.DefaultSingleRequestRunner;
 import dev.pbroman.simple.api.tester.control.DefaultTestResultProcessor;
 import dev.pbroman.simple.api.tester.control.DefaultTestSuiteRunner;
 import dev.pbroman.simple.api.tester.control.ValidatingConfigProcessor;
@@ -95,6 +97,12 @@ public class ApiTesterAutoConfiguration {
     @ConditionalOnMissingBean
     public HttpRequestHandler httpRequestHandler() {
         return new DefaultHttpRequestHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SingleRequestRunner singleRequestRunner(@Qualifier(MAIN_STACK) RequestProcessor requestProcessor) {
+        return new DefaultSingleRequestRunner(requestProcessor);
     }
 
 }
