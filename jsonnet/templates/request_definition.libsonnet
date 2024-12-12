@@ -1,7 +1,8 @@
-function(path, method, body, auth, headers)
+function(path, method, body, headers)
 {
   requestDefinition: {
     url: '${env.baseUrl}' + path,
     'method': method,
+    'headers': headers,
   },
 }

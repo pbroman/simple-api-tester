@@ -10,6 +10,6 @@ request_definition(
   path,
   method.key,
   {}, // TODO build a function for body from schema
-  {}, // auth
-  [], // headers
+  if (std.objectHas(method.value, 'requestBody') && std.objectHas(method.value.requestBody, 'content'))
+    then { 'Content-Type': std.objectFields(method.value.requestBody.content)[0], } else {}, // headers
 )
