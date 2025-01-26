@@ -1,19 +1,8 @@
-local metadata = import './metadata.libsonnet';
-local request = import './request.libsonnet';
-local post_request = import './post_request.libsonnet';
-
-local request_wrapper = function(path)
-std.flattenArrays([
-  if method.key == 'post' then post_request(path.key, method.value) else request(path.key, method) for method in std.objectKeysValuesAll(path.value)
-]);
-
-function(openapi)
-metadata(
-  openapi.info.title,
-  'Generated from openapi. Application version: '
-    + if std.objectHas(openapi.info, 'version') then openapi.info.version else 'unknown'
-    + ', openapi version: ' + openapi.openapi
-) +
-{
-  requests: std.flattenArrays([ request_wrapper(path) for path in std.objectKeysValuesAll(openapi.paths) ])
-}
+function(metadata=null, requests=[], sub_suites=[], constants=null, auth=null, default_timeout=null, skip_condition=null)
+  (if metadata != null then metadata else { 'metadata': { name: 'unknown' } }) +
+  { 'requests': requests } +
+  { subSuites: sub_suites } +
+  (if constants != null then constants else { constants: {} }) +
+  (if auth != null then auth else {}) +
+  (if default_timeout != null then default_timeout else {}) +
+  if skip_condition != null then skip_condition else {}

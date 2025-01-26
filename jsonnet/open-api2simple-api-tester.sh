@@ -90,7 +90,7 @@ main() {
 
   echo "Converting openapi ${INPUT} to simple-api-tester yaml."
 
-  mapfile -t yaml_array < <(jsonnet --string create_apitester_yaml.jsonnet)
+  mapfile -t yaml_array < <(jsonnet --string openapi_apitester_yaml.jsonnet)
 
   if [[ "${PRETTY_PRINT}" != "false" ]]; then
     mapfile -t yaml_array < <(pretty_print_raw_json  "${yaml_array[@]}")

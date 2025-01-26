@@ -1,6 +1,6 @@
-function(name, description) {
+function(name='unknown', description=null) {
   metadata: {
     'name': name,
-    'description': description,
-  },
+  } +
+  if description != null then { 'description': description } else {}
 }

@@ -1,13 +1,6 @@
-local metadata = import './metadata.libsonnet';
-local request_definition = import './request_definition.libsonnet';
-
-function(path, method)
-[
-metadata(
-  method.value.operationId,
-  if std.objectHas(method.value, 'summary') then method.value.summary else ''
-) +
-request_definition(
-  path,
-  method.key,
-)]
+function(metadata=null, request_definition=null, response_handling=null, flow_control=null, skip_condition=null)
+  (if metadata != null then metadata else { 'metadata': {} }) +
+  (if request_definition != null then request_definition else { requestDefinition: {} }) +
+  (if response_handling != null then response_handling else { responseHandling: { assertions: [] }}) +
+  (if flow_control != null then flow_control else {}) +
+  if skip_condition != null then skip_condition else {}
