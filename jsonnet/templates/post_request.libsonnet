@@ -12,6 +12,7 @@ request_definition(
   'POST',
   if (std.objectHas(requests, 'requestBody') && std.objectHas(requests.requestBody, 'content'))
     then { 'Content-Type': std.objectFields(requests.requestBody.content)[0], } else {}, // headers
+  {},
 )
 ];
 
