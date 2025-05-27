@@ -7,7 +7,8 @@ local single = function(path, requests)
   request(
     metadata(
       requests.operationId,
-      if std.objectHas(requests, 'summary') then requests.summary else ''
+      if std.objectHas(requests, 'summary') then requests.summary else null,
+      if std.objectHas(requests, 'description') then requests.description else null
     ),
     request_definition(
       path,
