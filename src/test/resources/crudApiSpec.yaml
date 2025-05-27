@@ -31,10 +31,7 @@ subSuites:
           headers:
             Content-Type: application/json
           body:
-            raw: >
-              {
-                "username": "first"
-              }
+            file: body_files/username_first_body.json
         responseHandling: &createResponseHandling
           assertions:
             - value: ${response.statusCode}

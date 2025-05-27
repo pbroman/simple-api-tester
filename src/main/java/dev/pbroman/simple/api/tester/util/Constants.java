@@ -15,6 +15,7 @@ public class Constants {
     public static final String STATUS_CODE = "statusCode";
     public static final String BODY = "body";
     public static final String RAW_BODY = "raw";
+    public static final String FILE_BODY = "file";
     public static final String BODY_STRING = "_bodyString";
     public static final String JSON = "json";
 

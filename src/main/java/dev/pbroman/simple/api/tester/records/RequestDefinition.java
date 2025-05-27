@@ -7,6 +7,8 @@ import dev.pbroman.simple.api.tester.records.result.Validation;
 import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import dev.pbroman.simple.api.tester.records.runtime.RuntimeData;
 import dev.pbroman.simple.api.tester.util.Interpolation;
+import dev.pbroman.simple.api.tester.util.ResourceReader;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,21 +50,20 @@ public record RequestDefinition(
                 if ( headers.get("Content-Type").startsWith("application/json")) {
                     if (body.get(RAW_BODY) != null) {
                         var jsonBody = body.get(RAW_BODY);
-                        try {
-                            new ObjectMapper().readTree(jsonBody);
-                            body.put(BODY_STRING, jsonBody);
-                        } catch (JsonProcessingException e) {
-                            var message = "The content-type for request " + method + " " + url +
-                                    " set to application/json, but the body is not valid json. Body: " + jsonBody;
-                            validations.add(validation(message, ValidationType.FAIL));
-                        }
+                        setJsonBodyString(jsonBody, validations);
+                    } else if (body.get(FILE_BODY) != null) {
+                        var jsonBody = ResourceReader.readFileToString(body.get(FILE_BODY));
+                        setJsonBodyString(jsonBody, validations);
                     } else {
                         validations.add(validation("Body type 'raw' must be present for 'application/json' content type", ValidationType.FAIL));
                     }
                 }
                 else if ( headers.get("Content-Type").startsWith("application/x-www-form-urlencoded")) {
                     if (!body.isEmpty()) {
-                        body.put(BODY_STRING, body.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).reduce((a, b) -> a + "&" + b).orElse(""));
+                        body.put(BODY_STRING, body.entrySet().stream()
+                                .map(e -> e.getKey() + "=" + e.getValue())
+                                .reduce((a, b) -> a + "&" + b)
+                                .orElse(""));
                     } else {
                         validations.add(validation("Form-urlencoded body must define key-value pairs for the body", ValidationType.FAIL));
                     }
@@ -86,6 +87,16 @@ public record RequestDefinition(
         return validations;
     }
 
+    private void setJsonBodyString(String jsonBody, ArrayList<Validation> validations) {
+        try {
+            new ObjectMapper().readTree(jsonBody);
+            body.put(BODY_STRING, jsonBody);
+        } catch (JsonProcessingException e) {
+            var message = "The content-type for request " + method + " " + url +
+                    " set to application/json, but the body is not valid json. Body: " + jsonBody;
+            validations.add(validation(message, ValidationType.FAIL));
+        }
+    }
     private Validation validation(String message, ValidationType validationType) {
         return new Validation(this.getClass().getSimpleName(), method + " " + url, message, validationType);
     }
