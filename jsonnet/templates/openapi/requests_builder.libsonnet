@@ -7,7 +7,8 @@ local simple_request = function(path, method)
   request(
     metadata(
       method.value.operationId,
-      if std.objectHas(method.value, 'summary') then method.value.summary else null
+      if std.objectHas(method.value, 'summary') then method.value.summary else null,
+      if std.objectHas(method.value, 'description') then method.value.description else null
     ),
     request_definition(
       path,

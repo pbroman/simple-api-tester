@@ -7,7 +7,7 @@ import dev.pbroman.simple.api.tester.records.result.ValidationType;
 import java.util.ArrayList;
 import java.util.List;
 
-public record Metadata(String name, String description) implements ConfigRecord {
+public record Metadata(String name, String summary, String description) implements ConfigRecord {
 
     @Override
     public List<Validation> validate() {
